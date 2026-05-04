@@ -65,14 +65,22 @@ export default function PagesPage() {
                   }`}
                 >
                   {/* Page thumbnail image */}
-                  <div className="aspect-[3/4] bg-[#F5F5F7] relative">
+                  <div className="aspect-[3/4] bg-[#F5F5F7] relative flex items-center justify-center">
                     <img
                       src={thumb.url}
                       alt={`Page ${thumb.page}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       onError={(e) => {
-                        // Fallback if image fails to load
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        // Show page number fallback
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.thumb-fallback')) {
+                          const fallback = document.createElement('div');
+                          fallback.className = 'thumb-fallback flex flex-col items-center justify-center w-full h-full text-[#9CA3AF]';
+                          fallback.innerHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="6" y="4" width="20" height="24" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M10 11h12M10 16h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg><span style="font-size:11px;margin-top:8px">Page ${thumb.page}</span>`;
+                          parent.appendChild(fallback);
+                        }
                       }}
                     />
                     {/* Selected overlay */}

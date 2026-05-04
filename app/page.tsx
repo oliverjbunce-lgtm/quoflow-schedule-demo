@@ -46,6 +46,7 @@ export default function UploadPage() {
       sessionStorage.setItem('hf_session_id', result.hfSessionId || '');
       sessionStorage.setItem('hf_suggested_page', String(result.hfSuggestedPage || 1));
       sessionStorage.setItem('hf_thumbnails', JSON.stringify(result.hfThumbnails || []));
+      sessionStorage.setItem('tmp_file_id', result.tmpFileId || '');
       sessionStorage.removeItem('qf_pdf');
 
       router.push('/pages');

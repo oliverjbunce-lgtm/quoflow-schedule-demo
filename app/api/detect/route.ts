@@ -1,68 +1,74 @@
+import { readFileSync } from 'fs';
 import { NextResponse } from 'next/server';
 
 const HF_BASE_URL = 'https://oliverbunce-id-plan-analyser-api.hf.space';
 
 export const maxDuration = 60;
 
-async function analyseStoredPage(sessionId: string, page: number): Promise<{ count: number; annotated_image_url?: string; page: number } | null> {
-  try {
-    const form = new FormData();
-    form.append('session_id', sessionId);
-    form.append('page', String(page));
-
-    const res = await fetch(`${HF_BASE_URL}/analyse-stored`, {
-      method: 'POST',
-      body: form,
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-
-    // Normalise relative URLs
-    if (data.annotated_image_url?.startsWith('/')) {
-      data.annotated_image_url = `${HF_BASE_URL}${data.annotated_image_url}`;
-    }
-
-    return { count: data.count ?? 0, annotated_image_url: data.annotated_image_url, page };
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(req: Request) {
   try {
-    const { sessionId, suggestedPage } = await req.json();
+    const { tmpFileId, selectedPage } = await req.json();
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'No session ID' }, { status: 400 });
+    if (!tmpFileId) {
+      return NextResponse.json({ error: 'No file ID' }, { status: 400 });
     }
 
-    // Try the selected page + 1 page on either side as safety
-    const pagesToTry = [...new Set([
-      suggestedPage,
-      Math.max(1, suggestedPage - 1),
-      suggestedPage + 1,
-    ])].filter(p => p >= 1);
-
-    const results = await Promise.all(pagesToTry.map(p => analyseStoredPage(sessionId, p)));
-
-    const validResults = results.filter(Boolean) as { count: number; annotated_image_url?: string; page: number }[];
-
-    if (validResults.length === 0) {
-      return NextResponse.json({ error: 'No results from vision model' }, { status: 500 });
+    // Read PDF from /tmp
+    let fileBytes: Buffer;
+    try {
+      fileBytes = readFileSync(`/tmp/${tmpFileId}.pdf`);
+    } catch {
+      return NextResponse.json({ error: 'PDF not found — please re-upload' }, { status: 404 });
     }
 
-    // Return the page with the highest door count
-    const best = validResults.reduce((a, b) => (b.count > a.count ? b : a));
+    // Fresh upload to HF Space
+    const uploadForm = new FormData();
+    uploadForm.append('file', new Blob([fileBytes], { type: 'application/pdf' }), 'plan.pdf');
+
+    const uploadRes = await fetch(`${HF_BASE_URL}/upload`, {
+      method: 'POST',
+      body: uploadForm,
+    });
+
+    if (!uploadRes.ok) {
+      return NextResponse.json({ error: 'HF upload failed' }, { status: 500 });
+    }
+
+    const uploadData = await uploadRes.json();
+    const sessionId: string = uploadData.session_id;
+    const suggestedPage: number = uploadData.suggested_page ?? 1;
+
+    // Use the user-selected page, fall back to HF suggested
+    const pageToAnalyse = selectedPage || suggestedPage;
+
+    // Analyse the selected page
+    const analyseForm = new FormData();
+    analyseForm.append('session_id', sessionId);
+    analyseForm.append('page', String(pageToAnalyse));
+
+    const analyseRes = await fetch(`${HF_BASE_URL}/analyse-stored`, {
+      method: 'POST',
+      body: analyseForm,
+    });
+
+    if (!analyseRes.ok) {
+      return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
+    }
+
+    const result = await analyseRes.json();
+
+    // Normalise relative annotated image URL
+    if (result.annotated_image_url?.startsWith('/')) {
+      result.annotated_image_url = `${HF_BASE_URL}${result.annotated_image_url}`;
+    }
 
     return NextResponse.json({
-      count: best.count,
-      annotated_image_url: best.annotated_image_url,
-      page: best.page,
-      // Include breakdown for debugging
-      allPages: validResults,
+      count: result.count ?? 0,
+      annotated_image_url: result.annotated_image_url ?? null,
+      page: pageToAnalyse,
     });
   } catch (err) {
+    console.error('Detect error:', err);
     return NextResponse.json({ error: 'Detection failed' }, { status: 500 });
   }
 }

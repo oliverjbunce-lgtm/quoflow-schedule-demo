@@ -111,7 +111,7 @@ export default function ExtractPage() {
       return;
     }
 
-    const hfSessionId = sessionStorage.getItem('hf_session_id') || '';
+    const tmpFileId = sessionStorage.getItem('tmp_file_id') || '';
     const hfSelectedPage = parseInt(sessionStorage.getItem('hf_selected_page') || '0', 10);
 
     async function runExtract() {
@@ -143,13 +143,13 @@ export default function ExtractPage() {
     }
 
     async function runVision() {
-      if (!hfSessionId || hfSelectedPage <= 0) return;
+      if (!tmpFileId || hfSelectedPage <= 0) return;
       setYoloLoading(true);
       try {
         const detectRes = await fetch('/api/detect', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: hfSessionId, suggestedPage: hfSelectedPage }),
+          body: JSON.stringify({ tmpFileId, selectedPage: hfSelectedPage }),
         });
         if (!detectRes.ok) return;
         const detectData = await detectRes.json();

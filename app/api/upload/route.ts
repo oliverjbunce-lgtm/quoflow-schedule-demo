@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { writeFileSync } from 'fs';
+import { randomUUID } from 'crypto';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const HF_BASE_URL = 'https://oliverbunce-id-plan-analyser-api.hf.space';
@@ -25,6 +27,15 @@ export async function POST(req: NextRequest) {
     const buffer = await file.arrayBuffer();
     const fileBytes = new Uint8Array(buffer);
     const filename = file.name;
+
+    // Save PDF to /tmp for later re-upload at detect time (avoids HF session expiry)
+    const tmpFileId = randomUUID();
+    const tmpPath = `/tmp/${tmpFileId}.pdf`;
+    try {
+      writeFileSync(tmpPath, fileBytes);
+    } catch {
+      // non-fatal — detect will handle missing file gracefully
+    }
 
     // Build multipart/related body for Gemini File API
     const boundary = 'quoflow-file-upload-boundary';
@@ -98,6 +109,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       fileUri,
       filename,
+      tmpFileId,
       hfSessionId: hfData?.session_id ?? null,
       hfSuggestedPage: hfData?.suggested_page ?? 1,
       hfThumbnails: (hfData?.thumbnails ?? []).map((t: { page: number; url: string }) => ({
