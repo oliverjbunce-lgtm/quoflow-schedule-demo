@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import StepIndicator from '../components/StepIndicator';
 
 export default function UploadPage() {
   const router = useRouter();
@@ -59,11 +60,10 @@ export default function UploadPage() {
     if (f) handleFile(f);
   }
 
-  const stageLabel =
-    uploadStage === 'uploading' ? 'Uploading to AI…' : 'Reading file…';
-
   return (
     <div className="max-w-2xl mx-auto">
+      <StepIndicator currentStep={1} />
+
       {/* Hero */}
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-[#1D3461] mb-3">Door Schedule Extraction</h1>
@@ -79,7 +79,7 @@ export default function UploadPage() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           className={`
-            flex flex-col items-center justify-center w-full h-64 rounded-2xl border-2 border-dashed cursor-pointer transition-all
+            flex flex-col items-center justify-between w-full h-72 rounded-2xl border-2 border-dashed cursor-pointer transition-all px-6 py-8
             ${isDragging
               ? 'border-[#E9A620] bg-amber-50'
               : 'border-slate-300 bg-white hover:border-[#1D3461] hover:bg-slate-50'
@@ -93,9 +93,9 @@ export default function UploadPage() {
             className="hidden"
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           />
-          <div className="flex flex-col items-center gap-3 pointer-events-none">
-            <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5">
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 pointer-events-none">
+            <div className={`w-16 h-16 rounded-xl flex items-center justify-center transition-colors ${isDragging ? 'bg-amber-100' : 'bg-slate-100'}`}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={isDragging ? '#E9A620' : '#94a3b8'} strokeWidth="1.5">
                 <path d="M12 16V4M12 4l-4 4M12 4l4 4" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2" strokeLinecap="round" />
               </svg>
@@ -112,16 +112,23 @@ export default function UploadPage() {
               <span>✓ Issues flagged</span>
             </div>
           </div>
+          {/* Bottom support text */}
+          <p className="text-xs text-slate-300 pointer-events-none mt-2">
+            Supports PDF files up to 100MB&nbsp;•&nbsp;Files are not stored
+          </p>
         </label>
       )}
 
       {/* Loading state */}
       {loading && (
-        <div className="flex flex-col items-center justify-center w-full h-64 rounded-2xl border border-slate-200 bg-white gap-4">
-          <div className="w-12 h-12 border-3 border-slate-200 border-t-[#1D3461] rounded-full animate-spin" style={{ borderWidth: 3 }} />
+        <div className="flex flex-col items-center justify-center w-full h-72 rounded-2xl border border-slate-200 bg-white gap-4 shadow-sm">
+          <div
+            className="w-12 h-12 border-slate-200 rounded-full animate-spin"
+            style={{ borderWidth: 3, borderStyle: 'solid', borderTopColor: '#1D3461' }}
+          />
           <div className="text-center">
-            <p className="font-semibold text-slate-700">{filename}</p>
-            <p className="text-slate-400 text-sm mt-1">{stageLabel}</p>
+            <p className="font-bold text-[#1D3461] text-base">{filename}</p>
+            <p className="text-slate-400 text-sm mt-1">Uploading to AI…</p>
           </div>
         </div>
       )}
