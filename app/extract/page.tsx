@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import StepIndicator from '../../components/StepIndicator';
 import DoorTable from '../../components/DoorTable';
-import type { DoorRow, Flag, WallSpec } from '../../types';
+import type { DoorRow, Flag, WallSpec, YoloResult } from '../../types';
 
 const LOADING_MESSAGES = [
   'Reading floor plans…',
@@ -23,6 +23,8 @@ export default function ExtractPage() {
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState('');
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [yoloResult, setYoloResult] = useState<YoloResult | null>(null);
+  const [yoloLoading, setYoloLoading] = useState(false);
 
   // Cycle loading messages every 2 seconds
   useEffect(() => {
@@ -44,33 +46,65 @@ export default function ExtractPage() {
       return;
     }
 
-    async function run() {
+    const hfSessionId = sessionStorage.getItem('hf_session_id') || '';
+    const hfPage = parseInt(sessionStorage.getItem('hf_suggested_page') || '1', 10);
+
+    async function runGemini() {
+      const body = fileUri ? { fileUri } : { pdf };
+      const res = await fetch('/api/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const doorsWithIds: DoorRow[] = (data.doors as Omit<DoorRow, 'id'>[]).map((d) => ({
+        ...d,
+        id: uuidv4(),
+        softClose: Boolean(d.softClose),
+      }));
+      const wallsWithIds: WallSpec[] = ((data.walls ?? []) as Omit<WallSpec, 'id'>[]).map((w) => ({
+        ...w,
+        id: uuidv4(),
+      }));
+      setDoors(doorsWithIds);
+      setWalls(wallsWithIds);
+      setFlags(data.flags ?? []);
+    }
+
+    async function runYolo() {
+      if (!hfSessionId) return;
+      setYoloLoading(true);
       try {
-        const body = fileUri ? { fileUri } : { pdf };
-        const res = await fetch('/api/extract', {
+        const detectRes = await fetch('/api/detect', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
+          body: JSON.stringify({ sessionId: hfSessionId, page: hfPage }),
         });
+        if (!detectRes.ok) return;
+        const detectData = await detectRes.json();
+        if (!detectData.error) setYoloResult(detectData);
+      } catch {
+        // Non-fatal — just don't show the section
+      } finally {
+        setYoloLoading(false);
+      }
+    }
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || `HTTP ${res.status}`);
-        }
-
-        const data = await res.json();
-        const doorsWithIds: DoorRow[] = (data.doors as Omit<DoorRow, 'id'>[]).map((d) => ({
-          ...d,
-          id: uuidv4(),
-          softClose: Boolean(d.softClose),
-        }));
-        const wallsWithIds: WallSpec[] = ((data.walls ?? []) as Omit<WallSpec, 'id'>[]).map((w) => ({
-          ...w,
-          id: uuidv4(),
-        }));
-        setDoors(doorsWithIds);
-        setWalls(wallsWithIds);
-        setFlags(data.flags ?? []);
+    async function run() {
+      try {
+        // Fire Gemini extraction and YOLO detection in parallel
+        await Promise.all([
+          runGemini().catch((err) => {
+            throw err; // Gemini errors are fatal
+          }),
+          runYolo(), // YOLO errors are swallowed inside runYolo
+        ]);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Extraction failed');
       } finally {
@@ -243,6 +277,76 @@ export default function ExtractPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Floor Plan Scan — YOLO detection results */}
+          {(yoloLoading || yoloResult) && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-bold text-[#1D3461]">Floor Plan Scan</h2>
+                <span className="text-xs text-slate-400 font-medium">Powered by YOLO</span>
+              </div>
+
+              {yoloLoading && (
+                <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl p-5">
+                  <div
+                    className="w-5 h-5 rounded-full flex-shrink-0 animate-spin"
+                    style={{ borderWidth: 2, borderStyle: 'solid', borderColor: '#e2e8f0', borderTopColor: '#1D3461' }}
+                  />
+                  <p className="text-sm text-slate-500 font-medium">Scanning floor plans…</p>
+                </div>
+              )}
+
+              {!yoloLoading && yoloResult && (() => {
+                const hfPage = parseInt(sessionStorage.getItem('hf_suggested_page') || '1', 10);
+                const geminiCount = doors.length;
+                const yoloCount = yoloResult.count ?? 0;
+                const diff = Math.abs(yoloCount - geminiCount);
+                const matches = diff <= 1;
+
+                return (
+                  <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      {/* Left: annotated image */}
+                      {yoloResult.annotated_image_url && (
+                        <div className="flex flex-col gap-2">
+                          <img
+                            src={yoloResult.annotated_image_url}
+                            alt="Annotated floor plan with detected doors"
+                            className="rounded-xl max-h-64 object-contain border border-slate-200 w-full"
+                          />
+                          <p className="text-xs text-slate-400 text-center">Detected doors highlighted</p>
+                        </div>
+                      )}
+
+                      {/* Right: stats */}
+                      <div className="flex flex-col justify-center gap-3">
+                        <div>
+                          <p className="text-3xl font-bold text-[#1D3461]">{yoloCount}</p>
+                          <p className="text-sm text-slate-500 mt-0.5">doors detected</p>
+                        </div>
+
+                        {matches ? (
+                          <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                            ✓ Matches schedule
+                          </span>
+                        ) : yoloCount > geminiCount ? (
+                          <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                            ⚠ {diff} door{diff !== 1 ? 's' : ''} not in schedule — review
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                            ⚠ Schedule has {diff} more door{diff !== 1 ? 's' : ''} than detected
+                          </span>
+                        )}
+
+                        <p className="text-xs text-slate-400">Scanned page {hfPage} of your floor plans</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 

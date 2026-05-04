@@ -38,10 +38,14 @@ export default function UploadPage() {
         throw new Error(err.error || `Upload failed (HTTP ${res.status})`);
       }
 
-      const { fileUri } = await res.json();
+      const result = await res.json();
+      const { fileUri } = result;
 
       sessionStorage.setItem('qf_file_uri', fileUri);
       sessionStorage.setItem('qf_filename', f.name);
+      // Store HF Space session for YOLO detection
+      sessionStorage.setItem('hf_session_id', result.hfSessionId || '');
+      sessionStorage.setItem('hf_suggested_page', String(result.hfSuggestedPage || 1));
       // Clear any stale base64 data from previous sessions
       sessionStorage.removeItem('qf_pdf');
 

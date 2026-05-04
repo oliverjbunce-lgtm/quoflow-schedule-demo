@@ -56,3 +56,9 @@ export interface ExtractApiResponse {
   flags: Flag[];
   error?: string;
 }
+
+export interface YoloResult {
+  count: number;
+  annotated_image_url?: string;
+  page?: number;
+}

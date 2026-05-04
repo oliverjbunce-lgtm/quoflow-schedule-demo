@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const HF_BASE_URL = 'https://oliverbunce-id-plan-analyser-api.hf.space';
 
 export const maxDuration = 120;
 
@@ -23,12 +24,13 @@ export async function POST(req: NextRequest) {
 
     const buffer = await file.arrayBuffer();
     const fileBytes = new Uint8Array(buffer);
+    const filename = file.name;
 
     // Build multipart/related body for Gemini File API
     const boundary = 'quoflow-file-upload-boundary';
     const metadata = JSON.stringify({
       file: {
-        display_name: file.name,
+        display_name: filename,
         mime_type: 'application/pdf',
       },
     });
@@ -51,7 +53,8 @@ export async function POST(req: NextRequest) {
     body.set(fileBytes, offset); offset += fileBytes.length;
     body.set(endBytes, offset);
 
-    const uploadRes = await fetch(
+    // Upload to Gemini File API and HF Space in parallel
+    const geminiUpload = fetch(
       `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
@@ -62,6 +65,23 @@ export async function POST(req: NextRequest) {
         body,
       }
     );
+
+    const hfUpload = (async () => {
+      try {
+        const hfForm = new FormData();
+        hfForm.append('file', new Blob([fileBytes], { type: 'application/pdf' }), filename);
+        const hfRes = await fetch(`${HF_BASE_URL}/upload`, {
+          method: 'POST',
+          body: hfForm,
+        });
+        if (!hfRes.ok) return null;
+        return await hfRes.json();
+      } catch {
+        return null;
+      }
+    })();
+
+    const [uploadRes, hfData] = await Promise.all([geminiUpload, hfUpload]);
 
     if (!uploadRes.ok) {
       const errText = await uploadRes.text();
@@ -75,7 +95,12 @@ export async function POST(req: NextRequest) {
       throw new Error('Gemini File API returned no URI');
     }
 
-    return NextResponse.json({ fileUri, filename: file.name });
+    return NextResponse.json({
+      fileUri,
+      filename,
+      hfSessionId: hfData?.session_id ?? null,
+      hfSuggestedPage: hfData?.suggested_page ?? 1,
+    });
   } catch (err) {
     console.error('Upload route error:', err);
     return NextResponse.json(
