@@ -152,6 +152,17 @@ export default function DoorDetailPanel({
 
             {/* Form body */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+              {/* Room / Location context */}
+              <Field label="Room / Location">
+                <input
+                  type="text"
+                  value={door.roomContext ?? ''}
+                  onChange={(e) => update('roomContext', e.target.value)}
+                  placeholder="e.g. Bedroom 1, Ensuite, Hallway"
+                  className={inputCls}
+                />
+              </Field>
+
               {/* Row 1: Width | Height */}
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Width (mm)">

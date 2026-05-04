@@ -5,12 +5,13 @@ export const maxDuration = 120;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-const SYSTEM_PROMPT = `You are an expert estimator for a New Zealand door supply company. Your job is to read a full set of residential floor plans (provided as a PDF) and extract every piece of information related to doors and door frames.
+const SYSTEM_PROMPT = `You are an expert estimator for a New Zealand door supply company. Your job is to read a full set of residential floor plans (provided as a PDF) and extract every piece of information related to doors, door frames, and wall specifications.
 
 You must:
 1. Find ALL doors across the entire document — check door schedule tables, floor plan legends, elevation drawings, window/door schedules, and any notes pages.
 2. Extract contextual information that affects the door order: wall types, cavity slider specifications, fire ratings, acoustic requirements, weatherproofing notes.
-3. Identify anything that might cause problems or needs clarification.
+3. Extract all wall type specifications from the document.
+4. Identify anything that might cause problems or needs clarification.
 
 Return a JSON object with exactly this structure:
 {
@@ -18,6 +19,7 @@ Return a JSON object with exactly this structure:
     {
       "mark": "string — door mark/number e.g. D1, 1, A",
       "location": "string — room or location e.g. Bedroom 1, Hallway, Entry. Empty string if not specified.",
+      "roomContext": "string — Identify the room or space the door opens into based on room labels visible in the floor plan or schedule (e.g. Bedroom 1, Ensuite, Garage, Living/Dining). Use room labels from the floor plan. Empty string if not determinable.",
       "width": "string — width in mm, numbers only e.g. 810. Empty string if unknown.",
       "height": "string — height in mm, numbers only e.g. 2040. Empty string if unknown.",
       "thickness": "string — thickness in mm e.g. 40. Empty string if unknown.",
@@ -30,6 +32,16 @@ Return a JSON object with exactly this structure:
       "notes": "string — any door-specific notes, special requirements, or details worth flagging"
     }
   ],
+  "walls": [
+    {
+      "wallType": "string — wall type identifier e.g. Type A, W1, External, Internal",
+      "description": "string — full description e.g. 90mm timber stud, plasterboard both sides",
+      "thickness": "string — wall thickness e.g. 90mm. Empty string if unknown.",
+      "framingType": "string — framing material e.g. Timber stud, Steel stud, Concrete block, Brick. Empty string if unknown.",
+      "cavitySuitable": boolean,
+      "notes": "string — any relevant notes about this wall type"
+    }
+  ],
   "flags": [
     {
       "level": "string — one of: error, warning, info",
@@ -37,6 +49,11 @@ Return a JSON object with exactly this structure:
     }
   ]
 }
+
+Wall specification rules:
+- Extract all wall types/specifications mentioned in this document (wall schedules, legend, notes, or drawn details).
+- For each wall type, determine if it is suitable for a cavity sliding door system: cavitySuitable should be true for timber stud or steel stud walls typically 90mm or thicker; false for concrete, brick, masonry, or walls under 70mm.
+- If no wall specifications are found anywhere in the document, return an empty array for "walls".
 
 Flag level guide:
 - error: Missing critical info (e.g. door size not specified anywhere, conflicting dimensions, fire door required but no spec given)
@@ -118,7 +135,7 @@ export async function POST(req: NextRequest) {
     const rawText: string = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
     const cleaned = stripCodeFences(rawText);
 
-    let parsed: { doors?: object[]; flags?: object[] };
+    let parsed: { doors?: object[]; walls?: object[]; flags?: object[] };
     try {
       parsed = JSON.parse(cleaned);
     } catch {
@@ -127,9 +144,10 @@ export async function POST(req: NextRequest) {
     }
 
     const doors = Array.isArray(parsed.doors) ? parsed.doors : [];
+    const walls = Array.isArray(parsed.walls) ? parsed.walls : [];
     const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
 
-    return NextResponse.json({ doors, flags });
+    return NextResponse.json({ doors, walls, flags });
   } catch (err) {
     console.error('Extract route error:', err);
     return NextResponse.json(

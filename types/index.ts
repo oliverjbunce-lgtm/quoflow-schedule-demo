@@ -2,6 +2,7 @@ export interface DoorRow {
   id: string;
   mark: string;
   location: string;
+  roomContext?: string; // e.g. "Bedroom 1", "Ensuite", "Living/Dining"
   width: string;
   height: string;
   thickness: string;
@@ -12,6 +13,16 @@ export interface DoorRow {
   softClose: boolean;
   hardwareCode: string;
   notes: string;
+}
+
+export interface WallSpec {
+  id: string;
+  wallType: string;       // e.g. "Type A", "W1", "External"
+  description: string;    // e.g. "90mm timber stud framing"
+  thickness?: string;     // e.g. "90mm"
+  framingType?: string;   // e.g. "Timber stud", "Steel stud", "Concrete block"
+  cavitySuitable: boolean; // true if a cavity slider could work in this wall
+  notes?: string;
 }
 
 export interface Flag {
@@ -37,4 +48,11 @@ export interface QuoteData {
   deliveryType: 'Delivery' | 'Collection';
   globalSpecs: GlobalSpecs;
   doors: DoorRow[];
+}
+
+export interface ExtractApiResponse {
+  doors: Omit<DoorRow, 'id'>[];
+  walls: Omit<WallSpec, 'id'>[];
+  flags: Flag[];
+  error?: string;
 }

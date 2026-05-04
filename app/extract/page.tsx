@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import StepIndicator from '../../components/StepIndicator';
 import DoorTable from '../../components/DoorTable';
-import type { DoorRow, Flag } from '../../types';
+import type { DoorRow, Flag, WallSpec } from '../../types';
 
 const LOADING_MESSAGES = [
   'Reading floor plans…',
@@ -18,6 +18,7 @@ export default function ExtractPage() {
   const router = useRouter();
   const [doors, setDoors] = useState<DoorRow[]>([]);
   const [flags, setFlags] = useState<Flag[]>([]);
+  const [walls, setWalls] = useState<WallSpec[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState('');
@@ -63,7 +64,12 @@ export default function ExtractPage() {
           id: uuidv4(),
           softClose: Boolean(d.softClose),
         }));
+        const wallsWithIds: WallSpec[] = ((data.walls ?? []) as Omit<WallSpec, 'id'>[]).map((w) => ({
+          ...w,
+          id: uuidv4(),
+        }));
         setDoors(doorsWithIds);
+        setWalls(wallsWithIds);
         setFlags(data.flags ?? []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Extraction failed');
@@ -77,6 +83,7 @@ export default function ExtractPage() {
 
   function handleContinue() {
     sessionStorage.setItem('qf_doors', JSON.stringify(doors));
+    sessionStorage.setItem('qf_walls', JSON.stringify(walls));
     router.push('/quote');
   }
 
@@ -193,6 +200,51 @@ export default function ExtractPage() {
           </div>
 
           <DoorTable doors={doors} onChange={setDoors} />
+
+          {/* Wall Specifications */}
+          {walls.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-bold text-[#1D3461]">Wall Specifications</h2>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                  {walls.length} wall type{walls.length !== 1 ? 's' : ''} detected
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {walls.map((wall) => (
+                  <div
+                    key={wall.id}
+                    className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm ${
+                      wall.cavitySuitable ? 'border-l-4 border-l-green-400' : ''
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-[#1D3461] text-sm">{wall.wallType}</span>
+                      {wall.cavitySuitable ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                          Cavity Suitable ✓
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">
+                          Standard Only
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-700">{wall.description}</p>
+                    {(wall.thickness || wall.framingType) && (
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                        {wall.thickness && <span>Thickness: {wall.thickness}</span>}
+                        {wall.framingType && <span>Framing: {wall.framingType}</span>}
+                      </div>
+                    )}
+                    {wall.notes && (
+                      <p className="mt-2 text-xs text-slate-400">{wall.notes}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Action bar */}
           <div className="flex items-center gap-3 flex-wrap pt-2 border-t border-slate-100">

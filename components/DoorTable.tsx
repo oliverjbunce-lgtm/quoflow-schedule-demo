@@ -89,6 +89,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
             <tr className="bg-[#1D3461] text-white text-xs uppercase tracking-wider sticky top-0">
               <th className="py-3 px-4 font-semibold whitespace-nowrap w-16">Mark</th>
               <th className="py-3 px-4 font-semibold whitespace-nowrap">Location</th>
+              <th className="py-3 px-4 font-semibold whitespace-nowrap hidden sm:table-cell">Room</th>
               <th className="py-3 px-4 font-semibold whitespace-nowrap hidden sm:table-cell">W × H</th>
               <th className="py-3 px-4 font-semibold whitespace-nowrap">Hanging</th>
               <th className="py-3 px-4 font-semibold whitespace-nowrap hidden md:table-cell">Frame</th>
@@ -101,7 +102,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
           <tbody className="divide-y divide-gray-100">
             {doors.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-gray-400 text-sm">
+                <td colSpan={8} className="px-4 py-10 text-center text-gray-400 text-sm">
                   No doors yet. Add a row or re-run extraction.
                 </td>
               </tr>
@@ -134,6 +135,13 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                     <td className="py-2.5 px-4 text-slate-600 max-w-[140px]">
                       <span className="block truncate">
                         {door.location || <span className="text-slate-300">—</span>}
+                      </span>
+                    </td>
+
+                    {/* Room */}
+                    <td className="py-2.5 px-4 text-slate-600 hidden sm:table-cell max-w-[120px]">
+                      <span className="block truncate">
+                        {door.roomContext ? door.roomContext : <span className="text-slate-300">—</span>}
                       </span>
                     </td>
 
