@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
     // Fresh upload to HF Space
     const uploadForm = new FormData();
-    uploadForm.append('file', new Blob([fileBytes], { type: 'application/pdf' }), 'plan.pdf');
+    uploadForm.append('file', new Blob([fileBytes.buffer as ArrayBuffer], { type: 'application/pdf' }), 'plan.pdf');
 
     const uploadRes = await fetch(`${HF_BASE_URL}/upload`, {
       method: 'POST',
