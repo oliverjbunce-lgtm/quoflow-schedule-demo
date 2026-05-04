@@ -14,6 +14,11 @@ export interface DoorRow {
   notes: string;
 }
 
+export interface Flag {
+  level: 'error' | 'warning' | 'info';
+  message: string;
+}
+
 export interface GlobalSpecs {
   hingeDetails: string;
   jambStyle: 'Flat' | 'Groove';

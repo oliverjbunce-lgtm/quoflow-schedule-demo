@@ -1,28 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { DoorRow } from '@/types';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-const SYSTEM_PROMPT = `You are an expert at reading New Zealand residential construction floor plans and door schedules.
-Extract the door schedule table from this floor plan page. 
-Return ONLY a valid JSON array. Each element should represent one door row with these fields:
+const SYSTEM_PROMPT = `You are an expert estimator for a New Zealand door supply company. Your job is to read a full set of residential floor plans (provided as a PDF) and extract every piece of information related to doors and door frames.
+
+You must:
+1. Find ALL doors across the entire document — check door schedule tables, floor plan legends, elevation drawings, window/door schedules, and any notes pages.
+2. Extract contextual information that affects the door order: wall types, cavity slider specifications, fire ratings, acoustic requirements, weatherproofing notes.
+3. Identify anything that might cause problems or needs clarification.
+
+Return a JSON object with exactly this structure:
 {
-  "mark": "string (door number/ID e.g. D1, 1, A)",
-  "location": "string (room or area, e.g. Bedroom 1, Hallway — extract from schedule if present, otherwise empty string)",
-  "width": "string (width in mm, numbers only, e.g. 810)",
-  "height": "string (height in mm, numbers only, e.g. 2040)",
-  "thickness": "string (thickness in mm, e.g. 40)",
-  "hanging": "string (LH, RH, Slider, or Bi-Fold)",
-  "frameType": "string (Standard, Cavity, Bifold, Wardrobe, or Custom)",
-  "doorFinish": "string (Primed, White, RAW, or Custom)",
-  "doorCore": "string (Poly, Solid, or Honeycomb)",
-  "softClose": boolean,
-  "hardwareCode": "string (hardware code if present, else empty)",
-  "notes": "string (any additional notes)"
+  "doors": [
+    {
+      "mark": "string — door mark/number e.g. D1, 1, A",
+      "location": "string — room or location e.g. Bedroom 1, Hallway, Entry. Empty string if not specified.",
+      "width": "string — width in mm, numbers only e.g. 810. Empty string if unknown.",
+      "height": "string — height in mm, numbers only e.g. 2040. Empty string if unknown.",
+      "thickness": "string — thickness in mm e.g. 40. Empty string if unknown.",
+      "hanging": "string — one of: LH, RH, Slider, Bi-Fold. Use context clues from the floor plan if not explicit.",
+      "frameType": "string — one of: Standard, Cavity, Bifold, Wardrobe, Custom",
+      "doorFinish": "string — one of: Primed, White, RAW, Custom. Default to Primed if unspecified.",
+      "doorCore": "string — one of: Poly, Solid, Honeycomb. Default to Poly if unspecified.",
+      "softClose": boolean,
+      "hardwareCode": "string — hardware code if present, else empty string",
+      "notes": "string — any door-specific notes, special requirements, or details worth flagging"
+    }
+  ],
+  "flags": [
+    {
+      "level": "string — one of: error, warning, info",
+      "message": "string — clear, plain-English description of the issue or note"
+    }
+  ]
 }
-If no door schedule table is found on this page, return an empty array [].
-Do not include any text outside the JSON array.`;
+
+Flag level guide:
+- error: Missing critical info (e.g. door size not specified anywhere, conflicting dimensions, fire door required but no spec given)
+- warning: Something that needs clarification before ordering (e.g. hanging direction ambiguous, cavity slider width seems non-standard, duplicate door marks found)
+- info: Useful context that affects the job (e.g. all internal doors appear to be 2040 high, external doors require weatherstripping, wall type affects frame selection)
+
+Rules:
+- Include ALL doors found. Do not skip any.
+- If the same door appears in multiple places (e.g. schedule table + floor plan legend), merge into one entry — use the schedule table as primary source.
+- Do not fabricate data. If a field is genuinely unknown, leave it as an empty string.
+- Do not return markdown. Return only the raw JSON object.`;
 
 function stripCodeFences(text: string): string {
   return text
@@ -31,73 +54,69 @@ function stripCodeFences(text: string): string {
     .trim();
 }
 
-async function extractPageDoors(base64Image: string): Promise<DoorRow[]> {
-  const body = {
-    contents: [
-      {
-        parts: [
-          { text: SYSTEM_PROMPT },
-          {
-            inline_data: {
-              mime_type: 'image/png',
-              data: base64Image,
-            },
-          },
-        ],
-      },
-    ],
-  };
-
-  const res = await fetch(GEMINI_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini API error ${res.status}: ${errText}`);
-  }
-
-  const data = await res.json();
-  const rawText: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]';
-  const cleaned = stripCodeFences(rawText);
-
-  try {
-    const parsed = JSON.parse(cleaned);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    console.error('Failed to parse Gemini response:', cleaned);
-    return [];
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
     if (!GEMINI_API_KEY) {
       return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
 
-    const { pages } = await req.json() as { pages: string[] };
+    const body = await req.json() as { pdf?: string; pages?: string[] };
 
-    if (!pages || !Array.isArray(pages) || pages.length === 0) {
-      return NextResponse.json({ error: 'No pages provided' }, { status: 400 });
+    let parts: object[];
+
+    if (body.pdf) {
+      // Full PDF sent as base64 — preferred path
+      parts = [
+        { text: SYSTEM_PROMPT },
+        {
+          inline_data: {
+            mime_type: 'application/pdf',
+            data: body.pdf,
+          },
+        },
+      ];
+    } else if (body.pages && Array.isArray(body.pages) && body.pages.length > 0) {
+      // Fallback: individual page images
+      parts = [
+        { text: SYSTEM_PROMPT },
+        ...body.pages.map((p: string) => ({
+          inline_data: { mime_type: 'image/png', data: p },
+        })),
+      ];
+    } else {
+      return NextResponse.json({ error: 'No PDF or pages provided' }, { status: 400 });
     }
 
-    // Process all pages in parallel
-    const results = await Promise.all(pages.map(extractPageDoors));
-
-    // Merge and deduplicate by mark
-    const allDoors: DoorRow[] = results.flat();
-    const seen = new Set<string>();
-    const deduplicated = allDoors.filter((door) => {
-      const key = door.mark?.toLowerCase()?.trim();
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
+    const geminiRes = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts }],
+        generationConfig: { responseMimeType: 'application/json' },
+      }),
     });
 
-    return NextResponse.json({ doors: deduplicated });
+    if (!geminiRes.ok) {
+      const errText = await geminiRes.text();
+      throw new Error(`Gemini API error ${geminiRes.status}: ${errText}`);
+    }
+
+    const geminiData = await geminiRes.json();
+    const rawText: string = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+    const cleaned = stripCodeFences(rawText);
+
+    let parsed: { doors?: object[]; flags?: object[] };
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      console.error('Failed to parse Gemini response:', cleaned.slice(0, 500));
+      return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
+    }
+
+    const doors = Array.isArray(parsed.doors) ? parsed.doors : [];
+    const flags = Array.isArray(parsed.flags) ? parsed.flags : [];
+
+    return NextResponse.json({ doors, flags });
   } catch (err) {
     console.error('Extract route error:', err);
     return NextResponse.json(
