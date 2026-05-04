@@ -21,9 +21,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'PDF not found — please re-upload' }, { status: 404 });
     }
 
-    // Fresh upload to HF Space
+    // Fresh upload to HF Space — use Uint8Array to avoid Buffer pool slice issues
     const uploadForm = new FormData();
-    uploadForm.append('file', new Blob([fileBytes.buffer as ArrayBuffer], { type: 'application/pdf' }), 'plan.pdf');
+    uploadForm.append('file', new Blob([new Uint8Array(fileBytes)], { type: 'application/pdf' }), 'plan.pdf');
 
     const uploadRes = await fetch(`${HF_BASE_URL}/upload`, {
       method: 'POST',
@@ -31,7 +31,8 @@ export async function POST(req: Request) {
     });
 
     if (!uploadRes.ok) {
-      return NextResponse.json({ error: 'HF upload failed' }, { status: 500 });
+      const errText = await uploadRes.text();
+      return NextResponse.json({ error: `HF upload failed: ${uploadRes.status}` }, { status: 500 });
     }
 
     const uploadData = await uploadRes.json();
@@ -57,15 +58,16 @@ export async function POST(req: Request) {
 
     const result = await analyseRes.json();
 
-    // Normalise relative annotated image URL
-    if (result.annotated_image_url?.startsWith('/')) {
-      result.annotated_image_url = `${HF_BASE_URL}${result.annotated_image_url}`;
-    }
+    // API returns: { total, detections, image_b64, page_used }
+    const count: number = result.total ?? 0;
+    const imageSrc: string | null = result.image_b64
+      ? `data:image/jpeg;base64,${result.image_b64}`
+      : null;
 
     return NextResponse.json({
-      count: result.count ?? 0,
-      annotated_image_url: result.annotated_image_url ?? null,
-      page: pageToAnalyse,
+      count,
+      annotated_image_url: imageSrc,
+      page: result.page_used ?? pageToAnalyse,
     });
   } catch (err) {
     console.error('Detect error:', err);
