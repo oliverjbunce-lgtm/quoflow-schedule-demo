@@ -45,7 +45,7 @@ export default function UploadPage() {
       sessionStorage.setItem('qf_filename', f.name);
       sessionStorage.setItem('hf_session_id', result.hfSessionId || '');
       sessionStorage.setItem('hf_suggested_page', String(result.hfSuggestedPage || 1));
-      sessionStorage.setItem('hf_thumbnails', JSON.stringify(result.hfThumbnails || []));
+      // thumbnails fetched on-demand on /pages to avoid sessionStorage quota issues
       sessionStorage.setItem('tmp_file_id', result.tmpFileId || '');
       sessionStorage.removeItem('qf_pdf');
 

@@ -112,10 +112,6 @@ export async function POST(req: NextRequest) {
       tmpFileId,
       hfSessionId: hfData?.session_id ?? null,
       hfSuggestedPage: hfData?.suggested_page ?? 1,
-      hfThumbnails: (hfData?.pages ?? []).map((t: { page: number; url: string }) => ({
-        page: t.page,
-        url: t.url, // already a data:image/jpeg;base64,... URI — use as-is
-      })),
     });
   } catch (err) {
     console.error('Upload route error:', err);

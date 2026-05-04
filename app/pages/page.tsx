@@ -15,17 +15,33 @@ export default function PagesPage() {
   const [suggestedPage, setSuggestedPage] = useState(1);
   const [selectedPage, setSelectedPage] = useState<number | null>(null);
   const [manualPage, setManualPage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fileUri = sessionStorage.getItem('qf_file_uri');
+    const tmpFileId = sessionStorage.getItem('tmp_file_id');
     if (!fileUri) { router.replace('/'); return; }
 
-    const raw = sessionStorage.getItem('hf_thumbnails');
-    const thumbs: Thumbnail[] = raw ? JSON.parse(raw) : [];
-    const suggested = parseInt(sessionStorage.getItem('hf_suggested_page') || '1');
-    setThumbnails(thumbs);
-    setSuggestedPage(suggested);
-    setSelectedPage(suggested); // pre-select suggested page
+    // Fetch thumbnails on-demand (not from sessionStorage — avoids quota issues)
+    if (tmpFileId) {
+      setLoading(true);
+      fetch(`/api/thumbnails?tmpFileId=${tmpFileId}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) {
+            setThumbnails(data.pages ?? []);
+            setSuggestedPage(data.suggestedPage ?? 1);
+            setSelectedPage(data.suggestedPage ?? 1);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    } else {
+      const suggested = parseInt(sessionStorage.getItem('hf_suggested_page') || '1');
+      setSuggestedPage(suggested);
+      setSelectedPage(suggested);
+      setLoading(false);
+    }
   }, [router]);
 
   function handleContinue() {
@@ -35,6 +51,21 @@ export default function PagesPage() {
   }
 
   const hasThumbnails = thumbnails.length > 0;
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <StepIndicator currentStep={2} />
+        <div className="flex flex-col items-center justify-center py-32 text-[#6B7280]">
+          <svg className="animate-spin w-8 h-8 mb-4 text-[#0A84FF]" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          <p className="text-sm font-medium">Loading page thumbnails…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
