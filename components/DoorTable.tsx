@@ -12,17 +12,17 @@ interface DoorTableProps {
 }
 
 function HangingBadge({ value }: { value: string }) {
-  const base = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
+  const base = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium';
   if (value === 'Slider') {
-    return <span className={`${base} bg-amber-100 text-amber-700`}>{value}</span>;
+    return <span className={`${base} bg-amber-50 text-[#D97706]`}>{value}</span>;
   }
   if (value === 'Bi-Fold') {
-    return <span className={`${base} bg-blue-100 text-blue-700`}>{value}</span>;
+    return <span className={`${base} bg-blue-50 text-[#2563EB]`}>{value}</span>;
   }
   if (value === 'LH' || value === 'RH') {
-    return <span className={`${base} bg-slate-100 text-slate-600`}>{value}</span>;
+    return <span className={`${base} bg-[#F7F8FA] text-[#6B7280]`}>{value}</span>;
   }
-  return <span className={`${base} bg-slate-100 text-slate-500`}>{value}</span>;
+  return <span className={`${base} bg-[#F7F8FA] text-[#9CA3AF]`}>{value}</span>;
 }
 
 export default function DoorTable({ doors, onChange, showAllSpecs = false }: DoorTableProps) {
@@ -70,7 +70,6 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
     };
     const updated = [...doors, newDoor];
     onChange(updated);
-    // Auto-open new door in panel
     setSelectedDoorId(newDoor.id);
   }
 
@@ -83,26 +82,26 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-[#E5E7EB]">
         <table className="w-full text-sm text-left border-collapse">
           <thead>
-            <tr className="bg-[#1D3461] text-white text-xs uppercase tracking-wider sticky top-0">
-              <th className="py-3 px-4 font-semibold whitespace-nowrap w-16">Mark</th>
-              <th className="py-3 px-4 font-semibold whitespace-nowrap">Location</th>
-              <th className="py-3 px-4 font-semibold whitespace-nowrap hidden sm:table-cell">Room</th>
-              <th className="py-3 px-4 font-semibold whitespace-nowrap hidden sm:table-cell">W × H</th>
-              <th className="py-3 px-4 font-semibold whitespace-nowrap">Hanging</th>
-              <th className="py-3 px-4 font-semibold whitespace-nowrap hidden md:table-cell">Frame</th>
-              <th className="py-3 px-4 font-semibold whitespace-nowrap w-8 hidden sm:table-cell">
+            <tr className="bg-[#F7F8FA] border-b border-[#E5E7EB]">
+              <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap w-16">Mark</th>
+              <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap">Location</th>
+              <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap hidden sm:table-cell">Room</th>
+              <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap hidden sm:table-cell">W × H</th>
+              <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap">Hanging</th>
+              <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap hidden md:table-cell">Frame</th>
+              <th className="py-3 px-4 w-8 hidden sm:table-cell">
                 <span className="sr-only">Notes</span>
               </th>
               <th className="py-3 px-4 w-6"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-[#E5E7EB]">
             {doors.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-gray-400 text-sm">
+                <td colSpan={8} className="px-4 py-10 text-center text-[#9CA3AF] text-sm">
                   No doors yet. Add a row or re-run extraction.
                 </td>
               </tr>
@@ -111,42 +110,42 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                 const hasNotes = Boolean(door.notes && door.notes.trim());
                 const isSelected = door.id === selectedDoorId;
 
-                let rowBase = idx % 2 === 0 ? 'bg-white' : 'bg-[#fafbfd]';
-                if (isSelected) rowBase = 'bg-[#EEF2FF]';
+                let rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]';
+                if (isSelected) rowBg = 'bg-[#E9A620]/[0.06]';
 
                 const leftBorder = isSelected
-                  ? 'border-l-2 border-l-[#1D3461]'
+                  ? 'border-l-2 border-l-[#E9A620]'
                   : hasNotes
-                  ? 'border-l-2 border-l-amber-400'
+                  ? 'border-l-2 border-l-[#D97706]'
                   : 'border-l-2 border-l-transparent';
 
                 return (
                   <tr
                     key={door.id}
                     onClick={() => handleRowClick(door.id)}
-                    className={`cursor-pointer transition-colors hover:bg-[#f5f7fc] ${rowBase} ${leftBorder}`}
+                    className={`cursor-pointer transition-colors hover:bg-[#F7F8FA] ${rowBg} ${leftBorder}`}
                   >
                     {/* Mark */}
                     <td className="py-2.5 px-4 font-bold text-[#1D3461] w-16 whitespace-nowrap">
-                      {door.mark || <span className="text-slate-300 font-normal">—</span>}
+                      {door.mark || <span className="text-[#D1D5DB] font-normal">—</span>}
                     </td>
 
                     {/* Location */}
-                    <td className="py-2.5 px-4 text-slate-600 max-w-[140px]">
+                    <td className="py-2.5 px-4 text-[#0F1117] max-w-[140px]">
                       <span className="block truncate">
-                        {door.location || <span className="text-slate-300">—</span>}
+                        {door.location || <span className="text-[#D1D5DB]">—</span>}
                       </span>
                     </td>
 
                     {/* Room */}
-                    <td className="py-2.5 px-4 text-slate-600 hidden sm:table-cell max-w-[120px]">
+                    <td className="py-2.5 px-4 text-[#0F1117] hidden sm:table-cell max-w-[120px]">
                       <span className="block truncate">
-                        {door.roomContext ? door.roomContext : <span className="text-slate-300">—</span>}
+                        {door.roomContext ? door.roomContext : <span className="text-[#D1D5DB]">—</span>}
                       </span>
                     </td>
 
                     {/* W × H */}
-                    <td className="py-2.5 px-4 text-slate-700 font-mono text-xs whitespace-nowrap hidden sm:table-cell">
+                    <td className="py-2.5 px-4 text-[#0F1117] font-mono text-xs whitespace-nowrap hidden sm:table-cell">
                       {formatSize(door.width, door.height)}
                     </td>
 
@@ -155,14 +154,14 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                       {door.hanging ? (
                         <HangingBadge value={door.hanging} />
                       ) : (
-                        <span className="text-slate-300">—</span>
+                        <span className="text-[#D1D5DB]">—</span>
                       )}
                     </td>
 
                     {/* Frame */}
-                    <td className="py-2.5 px-4 text-slate-600 whitespace-nowrap hidden md:table-cell">
+                    <td className="py-2.5 px-4 text-[#0F1117] whitespace-nowrap hidden md:table-cell">
                       <span className="block truncate max-w-[100px]">
-                        {door.frameType || <span className="text-slate-300">—</span>}
+                        {door.frameType || <span className="text-[#D1D5DB]">—</span>}
                       </span>
                     </td>
 
@@ -170,14 +169,14 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                     <td className="py-2.5 px-4 w-8 hidden sm:table-cell">
                       {hasNotes && (
                         <span
-                          className="inline-block w-2 h-2 rounded-full bg-amber-400"
+                          className="inline-block w-2 h-2 rounded-full bg-[#D97706]"
                           title="Has notes"
                         />
                       )}
                     </td>
 
                     {/* Chevron */}
-                    <td className="py-2.5 px-4 w-6 text-slate-300 text-base leading-none select-none">
+                    <td className="py-2.5 px-4 w-6 text-[#D1D5DB] text-base leading-none select-none">
                       ›
                     </td>
                   </tr>
@@ -190,15 +189,15 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
 
       <button
         onClick={addRow}
-        className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg bg-white border border-slate-200 text-[#1D3461] shadow-sm hover:bg-[#1D3461] hover:text-white hover:border-[#1D3461] transition-all"
+        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-[#0F1117] hover:bg-[#F7F8FA] transition-colors"
       >
-        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
           <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
         Add Door
       </button>
 
-      {/* Detail panel — rendered inside DoorTable, not in pages */}
+      {/* Detail panel */}
       <DoorDetailPanel
         door={selectedDoor}
         onClose={() => setSelectedDoorId(null)}

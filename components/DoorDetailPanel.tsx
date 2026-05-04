@@ -22,7 +22,7 @@ const CORE_OPTIONS = ['Poly', 'Solid', 'Honeycomb'];
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+      <label className="block text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1">
         {label}
       </label>
       {children}
@@ -31,7 +31,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputCls =
-  'border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent w-full bg-white';
+  'border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E9A620]/30 focus:border-[#E9A620] w-full bg-white text-[#0F1117]';
 
 export default function DoorDetailPanel({
   door,
@@ -74,14 +74,13 @@ export default function DoorDetailPanel({
         aria-hidden="true"
       />
 
-      {/* Panel — desktop: right side fixed; mobile: bottom sheet */}
+      {/* Panel */}
       <div
         ref={panelRef}
         className={`
           fixed z-50 bg-white transition-transform duration-200 ease-out
-          /* Mobile: bottom sheet */
           bottom-0 left-0 right-0 rounded-t-2xl shadow-2xl max-h-[80vh] overflow-y-auto
-          md:bottom-auto md:top-0 md:left-auto md:right-0 md:w-[380px] md:h-full md:rounded-none md:border-l md:border-slate-200 md:shadow-xl md:overflow-y-auto
+          md:bottom-auto md:top-0 md:left-auto md:right-0 md:w-[380px] md:h-full md:rounded-none md:border-l md:border-[#E5E7EB] md:shadow-xl md:overflow-y-auto
           ${isOpen
             ? 'translate-y-0 md:translate-x-0'
             : 'translate-y-full md:translate-x-full'
@@ -93,36 +92,36 @@ export default function DoorDetailPanel({
         {door && (
           <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-start justify-between px-5 pt-5 pb-3 border-b border-slate-100 shrink-0">
+            <div className="flex items-start justify-between px-5 pt-5 pb-4 border-b border-[#E5E7EB] shrink-0">
               <div>
-                <h2 className="text-xl font-bold text-[#1D3461] leading-none">
+                <h2 className="text-xl font-bold text-[#0F1117] leading-none">
                   {door.mark || 'Unnamed Door'}
                 </h2>
                 {door.location && (
-                  <p className="text-sm text-slate-500 mt-1">{door.location}</p>
+                  <p className="text-sm text-[#6B7280] mt-1">{door.location}</p>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-lg transition-colors ml-2 shrink-0"
+                className="text-[#6B7280] hover:text-[#0F1117] p-1.5 rounded-lg transition-colors ml-2 shrink-0"
                 aria-label="Close panel"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
               </button>
             </div>
 
             {/* Navigation */}
             {totalDoors > 1 && (
-              <div className="flex items-center justify-between px-5 py-2.5 border-b border-slate-100 shrink-0">
+              <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#E5E7EB] shrink-0">
                 <button
                   onClick={() => onNavigate('prev')}
                   disabled={!prevDoor}
-                  className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  className={`flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${
                     prevDoor
-                      ? 'text-[#1D3461] hover:bg-[#f0f3fa]'
-                      : 'text-slate-300 cursor-not-allowed'
+                      ? 'text-[#6B7280] hover:text-[#0F1117]'
+                      : 'text-[#D1D5DB] cursor-not-allowed'
                   }`}
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -130,16 +129,16 @@ export default function DoorDetailPanel({
                   </svg>
                   {prevDoor ? prevDoor.mark || `Door ${currentIndex}` : 'First'}
                 </button>
-                <span className="text-xs text-slate-400 font-medium">
+                <span className="text-xs text-[#9CA3AF] font-medium">
                   {currentIndex + 1} / {totalDoors}
                 </span>
                 <button
                   onClick={() => onNavigate('next')}
                   disabled={!nextDoor}
-                  className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  className={`flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${
                     nextDoor
-                      ? 'text-[#1D3461] hover:bg-[#f0f3fa]'
-                      : 'text-slate-300 cursor-not-allowed'
+                      ? 'text-[#6B7280] hover:text-[#0F1117]'
+                      : 'text-[#D1D5DB] cursor-not-allowed'
                   }`}
                 >
                   {nextDoor ? nextDoor.mark || `Door ${currentIndex + 2}` : 'Last'}
@@ -269,8 +268,8 @@ export default function DoorDetailPanel({
                         onChange={(e) => update('softClose', e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#E9A620] rounded-full peer peer-checked:after:translate-x-5 peer-checked:bg-[#1D3461] after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
-                      <span className="ml-2 text-sm font-medium text-slate-700">
+                      <div className="w-10 h-5 bg-[#E5E7EB] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#E9A620]/30 rounded-full peer peer-checked:after:translate-x-5 peer-checked:bg-[#1D3461] after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                      <span className="ml-2 text-sm font-medium text-[#0F1117]">
                         {door.softClose ? 'Yes' : 'No'}
                       </span>
                     </label>
@@ -300,7 +299,7 @@ export default function DoorDetailPanel({
                 </Field>
               </div>
 
-              {/* Row 5: Notes full width */}
+              {/* Notes full width */}
               <Field label="Notes">
                 <textarea
                   value={door.notes}
@@ -313,17 +312,14 @@ export default function DoorDetailPanel({
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-slate-100 shrink-0">
+            <div className="px-5 py-4 border-t border-[#E5E7EB] shrink-0">
               <button
                 onClick={() => {
                   onDelete(door.id);
                   onClose();
                 }}
-                className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors"
+                className="text-sm font-medium text-[#DC2626] hover:underline"
               >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M1 3h12M5 3V2h4v1M2 3l1 9h8l1-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
                 Delete door
               </button>
             </div>

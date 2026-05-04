@@ -7,35 +7,38 @@ interface GlobalSpecsFormProps {
   onChange: (specs: GlobalSpecs) => void;
 }
 
+const inputCls = 'w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm bg-white text-[#0F1117] focus:outline-none focus:ring-2 focus:ring-[#E9A620]/30 focus:border-[#E9A620]';
+const labelCls = 'block text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1';
+
 export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProps) {
   function update<K extends keyof GlobalSpecs>(key: K, value: GlobalSpecs[K]) {
     onChange({ ...specs, [key]: value });
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-[#1D3461] uppercase tracking-wider mb-4">
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5">
+      <h3 className="text-xs font-semibold text-[#6B7280] uppercase tracking-widest mb-4">
         Global Specifications
       </h3>
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jamb Style</label>
+            <label className={labelCls}>Jamb Style</label>
             <select
               value={specs.jambStyle}
               onChange={(e) => update('jambStyle', e.target.value as GlobalSpecs['jambStyle'])}
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+              className={inputCls}
             >
               <option value="Flat">Flat</option>
               <option value="Groove">Groove</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jamb Material</label>
+            <label className={labelCls}>Jamb Material</label>
             <select
               value={specs.jambMaterial}
               onChange={(e) => update('jambMaterial', e.target.value as GlobalSpecs['jambMaterial'])}
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+              className={inputCls}
             >
               <option value="MDF">MDF</option>
               <option value="Pine">Pine</option>
@@ -44,35 +47,35 @@ export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProp
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Hardware Brand</label>
+          <label className={labelCls}>Hardware Brand</label>
           <input
             type="text"
             value={specs.hardwareBrand}
             onChange={(e) => update('hardwareBrand', e.target.value)}
             placeholder="e.g. Gainsborough, Lockwood"
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+            className={inputCls}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Hinge Details</label>
+          <label className={labelCls}>Hinge Details</label>
           <input
             type="text"
             value={specs.hingeDetails}
             onChange={(e) => update('hingeDetails', e.target.value)}
             placeholder="e.g. 3x 100mm butt hinges"
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+            className={inputCls}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Handle Height (mm)</label>
+          <label className={labelCls}>Handle Height (mm)</label>
           <input
             type="text"
             value={specs.handleHeight}
             onChange={(e) => update('handleHeight', e.target.value)}
             placeholder="1000"
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+            className={inputCls}
           />
         </div>
 
@@ -84,7 +87,7 @@ export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProp
             onChange={(e) => update('drillingRequired', e.target.checked)}
             className="w-4 h-4 accent-[#E9A620] cursor-pointer"
           />
-          <label htmlFor="drillingRequired" className="text-sm text-gray-700 cursor-pointer">
+          <label htmlFor="drillingRequired" className="text-sm text-[#0F1117] cursor-pointer">
             Drilling Required
           </label>
         </div>

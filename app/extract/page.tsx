@@ -8,8 +8,8 @@ import DoorTable from '../../components/DoorTable';
 import type { DoorRow, Flag, WallSpec, YoloResult } from '../../types';
 
 const LOADING_MESSAGES = [
-  'Reading floor plans…',
-  'Finding door schedules…',
+  'Quoflow AI is reading your document…',
+  'Identifying door schedules…',
   'Extracting specifications…',
   'Almost done…',
 ];
@@ -63,10 +63,9 @@ function SectionHeader({
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2.5">
-        <div className="w-1 h-5 bg-[#1D3461] rounded-full" />
-        <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wider">{title}</h2>
+        <h2 className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-widest">{title}</h2>
         {count !== undefined && (
-          <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-[#9CA3AF] bg-[#F7F8FA] border border-[#E5E7EB] px-2 py-0.5 rounded-full">
             {count}
           </span>
         )}
@@ -115,7 +114,7 @@ export default function ExtractPage() {
     const hfSessionId = sessionStorage.getItem('hf_session_id') || '';
     const hfPage = parseInt(sessionStorage.getItem('hf_suggested_page') || '1', 10);
 
-    async function runGemini() {
+    async function runExtract() {
       const body = fileUri ? { fileUri } : { pdf };
       const res = await fetch('/api/extract', {
         method: 'POST',
@@ -143,7 +142,7 @@ export default function ExtractPage() {
       setFlags(data.flags ?? []);
     }
 
-    async function runYolo() {
+    async function runVision() {
       if (!hfSessionId) return;
       setYoloLoading(true);
       try {
@@ -165,10 +164,10 @@ export default function ExtractPage() {
     async function run() {
       try {
         await Promise.all([
-          runGemini().catch((err) => {
-            throw err; // Gemini errors are fatal
+          runExtract().catch((err) => {
+            throw err;
           }),
-          runYolo(), // YOLO errors are swallowed inside runYolo
+          runVision(),
         ]);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Extraction failed');
@@ -194,41 +193,40 @@ export default function ExtractPage() {
       <StepIndicator currentStep={2} />
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#1D3461]">Review Extracted Schedule</h1>
-        <p className="text-slate-500 mt-1">
-          AI has read <strong>{filename}</strong>. Review and edit before continuing.
+        <h1 className="text-2xl font-bold text-[#0F1117]">Review Extracted Schedule</h1>
+        <p className="text-[#6B7280] mt-1 text-sm">
+          Quoflow AI has read <strong className="text-[#0F1117] font-semibold">{filename}</strong>. Review and edit before continuing.
         </p>
       </div>
 
       {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center min-h-[300px] bg-white border border-slate-200 rounded-2xl gap-5">
-          <div className="relative w-14 h-14">
+        <div className="flex flex-col items-center justify-center min-h-[300px] bg-white border border-[#E5E7EB] rounded-xl gap-5">
+          <div className="relative w-12 h-12">
             <div
-              className="w-14 h-14 border-slate-200 rounded-full animate-spin"
-              style={{ borderWidth: 3, borderStyle: 'solid', borderTopColor: '#1D3461' }}
+              className="w-12 h-12 rounded-full"
+              style={{ border: '2px solid #E5E7EB', borderTopColor: '#1D3461', animation: 'spin 0.8s linear infinite' }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#E9A620]" />
+              <div className="w-2 h-2 rounded-full bg-[#E9A620]" />
             </div>
           </div>
           <div className="text-center">
             <p
               key={loadingMsgIdx}
-              className="font-semibold text-slate-700 text-base transition-all"
+              className="font-semibold text-[#0F1117] text-sm"
               style={{ animation: 'fadeIn 0.4s ease' }}
             >
               {LOADING_MESSAGES[loadingMsgIdx]}
             </p>
-            <p className="text-slate-400 text-sm mt-1">Gemini 2.5 Flash is reading every page</p>
           </div>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-          <p className="font-bold mb-1">Extraction Failed</p>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-[#DC2626]">
+          <p className="font-bold mb-1 text-sm">Extraction Failed</p>
           <p className="text-sm">{error}</p>
           <button onClick={() => router.push('/')} className="mt-3 text-sm text-[#1D3461] font-semibold underline">
             Back to Upload
@@ -239,20 +237,20 @@ export default function ExtractPage() {
       {!loading && !error && (
         <div className="space-y-6">
 
-          {/* ── Layer 1: Summary strip ─────────────────────────────────── */}
-          <div className="animate-fadeIn flex items-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl">
-            <span className="text-sm font-semibold text-slate-700">
+          {/* ── Summary strip ─────────────────────────────────── */}
+          <div className="animate-fadeIn flex items-center gap-3 py-3 px-4 bg-white border border-[#E5E7EB] rounded-xl">
+            <span className="text-sm font-semibold text-[#0F1117]">
               {doors.length} door{doors.length !== 1 ? 's' : ''} extracted
             </span>
-            <span className="w-px h-4 bg-slate-200" />
+            <span className="w-px h-4 bg-[#E5E7EB]" />
 
             {errorCount > 0 && (
               <button
                 onClick={() => setActiveFilter(activeFilter === 'error' ? null : 'error')}
                 className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${
                   activeFilter === 'error'
-                    ? 'bg-red-100 text-red-700 ring-1 ring-red-300'
-                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                    ? 'bg-red-100 text-[#DC2626] ring-1 ring-red-300'
+                    : 'bg-red-50 text-[#DC2626] hover:bg-red-100'
                 }`}
               >
                 <IconError /> {errorCount} error{errorCount !== 1 ? 's' : ''}
@@ -264,8 +262,8 @@ export default function ExtractPage() {
                 onClick={() => setActiveFilter(activeFilter === 'warning' ? null : 'warning')}
                 className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${
                   activeFilter === 'warning'
-                    ? 'bg-amber-100 text-amber-700 ring-1 ring-amber-300'
-                    : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                    ? 'bg-amber-100 text-[#D97706] ring-1 ring-amber-300'
+                    : 'bg-amber-50 text-[#D97706] hover:bg-amber-100'
                 }`}
               >
                 <IconWarning /> {warningCount} warning{warningCount !== 1 ? 's' : ''}
@@ -273,17 +271,17 @@ export default function ExtractPage() {
             )}
 
             {errorCount === 0 && warningCount === 0 && (
-              <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
+              <span className="flex items-center gap-1.5 text-xs font-medium text-[#059669]">
                 <IconCheck /> No issues found
               </span>
             )}
 
             {activeFilter && (
               <>
-                <span className="ml-auto text-xs text-slate-400">Filtered</span>
+                <span className="ml-auto text-xs text-[#9CA3AF]">Filtered</span>
                 <button
                   onClick={() => setActiveFilter(null)}
-                  className="text-xs text-slate-400 hover:text-slate-600 underline"
+                  className="text-xs text-[#9CA3AF] hover:text-[#6B7280] underline"
                 >
                   Clear
                 </button>
@@ -291,12 +289,12 @@ export default function ExtractPage() {
             )}
           </div>
 
-          {/* ── Layer 2: General flags drawer ──────────────────────────── */}
+          {/* ── General flags drawer ──────────────────────────── */}
           {flags.length > 0 && (
             <div className="animate-fadeIn mb-4">
               <button
                 onClick={() => setFlagsOpen(!flagsOpen)}
-                className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors py-1"
+                className="flex items-center gap-2 text-sm font-medium text-[#6B7280] hover:text-[#0F1117] transition-colors py-1"
               >
                 <svg
                   width="12"
@@ -317,10 +315,10 @@ export default function ExtractPage() {
                       key={i}
                       className={`flex items-start gap-3 px-4 py-3 rounded-lg text-sm border-l-4 ${
                         flag.level === 'error'
-                          ? 'border-l-red-400 bg-red-50 text-red-700'
+                          ? 'border-l-red-400 bg-red-50 text-[#DC2626]'
                           : flag.level === 'warning'
-                          ? 'border-l-amber-400 bg-amber-50 text-amber-700'
-                          : 'border-l-blue-400 bg-blue-50 text-blue-700'
+                          ? 'border-l-amber-400 bg-amber-50 text-[#D97706]'
+                          : 'border-l-blue-400 bg-blue-50 text-[#2563EB]'
                       }`}
                     >
                       <span className="mt-0.5 shrink-0">
@@ -334,21 +332,21 @@ export default function ExtractPage() {
             </div>
           )}
 
-          {/* ── Layer 3: Door Schedule ─────────────────────────────────── */}
+          {/* ── Door Schedule ─────────────────────────────────── */}
           <div className="animate-fadeIn">
             <SectionHeader
               title="Door Schedule"
               count={doors.length}
-              right={<span className="text-slate-400 text-xs">Click any row to edit</span>}
+              right={<span className="text-[#9CA3AF] text-xs">Click any row to edit</span>}
             />
             {activeFilter && (
-              <div className="mb-3 flex items-center gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg">
+              <div className="mb-3 flex items-center gap-2 text-xs text-[#6B7280] bg-[#F7F8FA] border border-[#E5E7EB] px-3 py-2 rounded-lg">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                   <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5"/>
                   <path d="M6 5v3M6 3.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
                 Filter active: showing all {doors.length} door{doors.length !== 1 ? 's' : ''} — door-level filtering coming soon
-                <button onClick={() => setActiveFilter(null)} className="ml-auto text-slate-400 hover:text-slate-600 underline">
+                <button onClick={() => setActiveFilter(null)} className="ml-auto text-[#9CA3AF] hover:text-[#6B7280] underline">
                   Clear
                 </button>
               </div>
@@ -364,31 +362,31 @@ export default function ExtractPage() {
                 {walls.map((wall) => (
                   <div
                     key={wall.id}
-                    className={`bg-white border border-slate-200 rounded-xl p-4 shadow-sm ${
-                      wall.cavitySuitable ? 'border-l-4 border-l-green-400' : ''
+                    className={`bg-white border border-[#E5E7EB] rounded-xl p-4 ${
+                      wall.cavitySuitable ? 'border-l-4 border-l-[#059669]' : ''
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-bold text-[#1D3461] text-sm">{wall.wallType}</span>
                       {wall.cavitySuitable ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-[#059669]">
                           <IconCheck /> Cavity Suitable
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#F7F8FA] text-[#9CA3AF]">
                           Standard Only
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-700">{wall.description}</p>
+                    <p className="text-sm text-[#0F1117]">{wall.description}</p>
                     {(wall.thickness || wall.framingType) && (
-                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-[#6B7280]">
                         {wall.thickness && <span>Thickness: {wall.thickness}</span>}
                         {wall.framingType && <span>Framing: {wall.framingType}</span>}
                       </div>
                     )}
                     {wall.notes && (
-                      <p className="mt-2 text-xs text-slate-400">{wall.notes}</p>
+                      <p className="mt-2 text-xs text-[#9CA3AF]">{wall.notes}</p>
                     )}
                   </div>
                 ))}
@@ -396,33 +394,33 @@ export default function ExtractPage() {
             </div>
           )}
 
-          {/* ── Floor Plan Scan — YOLO detection results ───────────────── */}
+          {/* ── Floor Plan Analysis — vision detection results ───────────────── */}
           {(yoloLoading || yoloResult) && (
             <div className="animate-fadeIn space-y-4">
               <SectionHeader
-                title="Floor Plan Scan"
-                right={<span className="text-xs text-slate-400 font-medium">Powered by YOLO</span>}
+                title="Floor Plan Analysis"
+                right={<span className="text-[11px] text-[#9CA3AF] font-medium uppercase tracking-wide">Quoflow Vision</span>}
               />
 
               {yoloLoading && (
-                <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl p-5">
+                <div className="flex items-center gap-3 bg-white border border-[#E5E7EB] rounded-xl p-5">
                   <div
-                    className="w-5 h-5 rounded-full flex-shrink-0 animate-spin"
-                    style={{ borderWidth: 2, borderStyle: 'solid', borderColor: '#e2e8f0', borderTopColor: '#1D3461' }}
+                    className="w-5 h-5 rounded-full flex-shrink-0"
+                    style={{ border: '2px solid #E5E7EB', borderTopColor: '#1D3461', animation: 'spin 0.8s linear infinite' }}
                   />
-                  <p className="text-sm text-slate-500 font-medium">Scanning floor plans…</p>
+                  <p className="text-sm text-[#6B7280] font-medium">Scanning floor plans…</p>
                 </div>
               )}
 
               {!yoloLoading && yoloResult && (() => {
                 const hfPage = parseInt(sessionStorage.getItem('hf_suggested_page') || '1', 10);
-                const geminiCount = doors.length;
-                const yoloCount = yoloResult.count ?? 0;
-                const diff = Math.abs(yoloCount - geminiCount);
+                const extractCount = doors.length;
+                const visionCount = yoloResult.count ?? 0;
+                const diff = Math.abs(visionCount - extractCount);
                 const matches = diff <= 1;
 
                 return (
-                  <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                  <div className="bg-white border border-[#E5E7EB] rounded-xl p-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       {/* Left: annotated image */}
                       {yoloResult.annotated_image_url && (
@@ -430,34 +428,34 @@ export default function ExtractPage() {
                           <img
                             src={yoloResult.annotated_image_url}
                             alt="Annotated floor plan with detected doors"
-                            className="rounded-xl max-h-64 object-contain border border-slate-200 w-full"
+                            className="rounded-xl max-h-64 object-contain border border-[#E5E7EB] w-full"
                           />
-                          <p className="text-xs text-slate-400 text-center">Detected doors highlighted</p>
+                          <p className="text-xs text-[#9CA3AF] text-center">Detected doors highlighted</p>
                         </div>
                       )}
 
                       {/* Right: stats */}
                       <div className="flex flex-col justify-center gap-3">
                         <div>
-                          <p className="text-3xl font-bold text-[#1D3461]">{yoloCount}</p>
-                          <p className="text-sm text-slate-500 mt-0.5">doors detected</p>
+                          <p className="text-3xl font-bold text-[#1D3461]">{visionCount}</p>
+                          <p className="text-sm text-[#6B7280] mt-0.5">doors detected</p>
                         </div>
 
                         {matches ? (
-                          <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                          <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-[#059669] text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
                             <IconCheck /> Matches schedule
                           </span>
-                        ) : yoloCount > geminiCount ? (
-                          <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                        ) : visionCount > extractCount ? (
+                          <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-[#D97706] text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
                             <IconWarning /> {diff} door{diff !== 1 ? 's' : ''} not in schedule — review
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                          <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-[#D97706] text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
                             <IconWarning /> Schedule has {diff} more door{diff !== 1 ? 's' : ''} than detected
                           </span>
                         )}
 
-                        <p className="text-xs text-slate-400">Scanned page {hfPage} of your floor plans</p>
+                        <p className="text-xs text-[#9CA3AF]">Scanned page {hfPage} of your floor plans</p>
                       </div>
                     </div>
                   </div>
@@ -467,10 +465,10 @@ export default function ExtractPage() {
           )}
 
           {/* ── Action bar ─────────────────────────────────────────────── */}
-          <div className="flex items-center gap-3 flex-wrap pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-3 flex-wrap pt-2 border-t border-[#E5E7EB]">
             <button
               onClick={() => router.push('/')}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-[#0F1117] text-sm font-medium hover:bg-[#F7F8FA] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M9 2L3 7l6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -482,8 +480,8 @@ export default function ExtractPage() {
               disabled={doors.length === 0}
               className={`inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                 doors.length === 0
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  : 'bg-[#1D3461] text-white hover:bg-[#142549]'
+                  ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
+                  : 'bg-[#E9A620] text-white hover:bg-[#D4941C]'
               }`}
             >
               Continue to Quote
@@ -494,6 +492,16 @@ export default function ExtractPage() {
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
