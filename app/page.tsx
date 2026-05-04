@@ -45,9 +45,10 @@ export default function UploadPage() {
       sessionStorage.setItem('qf_filename', f.name);
       sessionStorage.setItem('hf_session_id', result.hfSessionId || '');
       sessionStorage.setItem('hf_suggested_page', String(result.hfSuggestedPage || 1));
+      sessionStorage.setItem('hf_thumbnails', JSON.stringify(result.hfThumbnails || []));
       sessionStorage.removeItem('qf_pdf');
 
-      router.push('/extract');
+      router.push('/pages');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload file. Please try again.');
       setLoading(false);

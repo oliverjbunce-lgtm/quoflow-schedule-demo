@@ -37,8 +37,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No session ID' }, { status: 400 });
     }
 
-    // Try pages 1, 2, 3, and suggestedPage — pick the one with most doors detected
-    const pagesToTry = [...new Set([1, 2, 3, suggestedPage || 1])].filter(p => p >= 1);
+    // Try the selected page + 1 page on either side as safety
+    const pagesToTry = [...new Set([
+      suggestedPage,
+      Math.max(1, suggestedPage - 1),
+      suggestedPage + 1,
+    ])].filter(p => p >= 1);
 
     const results = await Promise.all(pagesToTry.map(p => analyseStoredPage(sessionId, p)));
 

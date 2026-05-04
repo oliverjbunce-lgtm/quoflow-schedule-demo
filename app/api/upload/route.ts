@@ -100,6 +100,10 @@ export async function POST(req: NextRequest) {
       filename,
       hfSessionId: hfData?.session_id ?? null,
       hfSuggestedPage: hfData?.suggested_page ?? 1,
+      hfThumbnails: (hfData?.thumbnails ?? []).map((t: { page: number; url: string }) => ({
+        page: t.page,
+        url: t.url.startsWith('/') ? `https://oliverbunce-id-plan-analyser-api.hf.space${t.url}` : t.url,
+      })),
     });
   } catch (err) {
     console.error('Upload route error:', err);

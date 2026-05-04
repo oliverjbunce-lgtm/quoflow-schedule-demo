@@ -67,7 +67,7 @@ export default function QuotePage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <StepIndicator currentStep={3} />
+      <StepIndicator currentStep={4} />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#0F1117] mb-1">Build Quote</h1>

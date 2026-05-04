@@ -2,9 +2,10 @@
 
 const steps = [
   { number: 1, label: 'Upload' },
-  { number: 2, label: 'Review' },
-  { number: 3, label: 'Quote' },
-  { number: 4, label: 'Preview' },
+  { number: 2, label: 'Pages' },
+  { number: 3, label: 'Review' },
+  { number: 4, label: 'Quote' },
+  { number: 5, label: 'Preview' },
 ];
 
 interface StepIndicatorProps {

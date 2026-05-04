@@ -23,7 +23,7 @@ export default function PreviewPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <StepIndicator currentStep={4} />
+      <StepIndicator currentStep={5} />
 
       {/* Action bar */}
       <div className="no-print flex items-center justify-between mb-6">

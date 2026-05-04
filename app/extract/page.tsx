@@ -112,7 +112,7 @@ export default function ExtractPage() {
     }
 
     const hfSessionId = sessionStorage.getItem('hf_session_id') || '';
-    const hfPage = parseInt(sessionStorage.getItem('hf_suggested_page') || '1', 10);
+    const hfSelectedPage = parseInt(sessionStorage.getItem('hf_selected_page') || '0', 10);
 
     async function runExtract() {
       const body = fileUri ? { fileUri } : { pdf };
@@ -143,13 +143,13 @@ export default function ExtractPage() {
     }
 
     async function runVision() {
-      if (!hfSessionId) return;
+      if (!hfSessionId || hfSelectedPage <= 0) return;
       setYoloLoading(true);
       try {
         const detectRes = await fetch('/api/detect', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: hfSessionId, suggestedPage: hfPage }),
+          body: JSON.stringify({ sessionId: hfSessionId, suggestedPage: hfSelectedPage }),
         });
         if (!detectRes.ok) return;
         const detectData = await detectRes.json();
@@ -190,7 +190,7 @@ export default function ExtractPage() {
 
   return (
     <div>
-      <StepIndicator currentStep={2} />
+      <StepIndicator currentStep={3} />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#0F1117]">Review Extracted Schedule</h1>
@@ -413,7 +413,7 @@ export default function ExtractPage() {
               )}
 
               {!yoloLoading && yoloResult && (() => {
-                const hfPage = parseInt(sessionStorage.getItem('hf_suggested_page') || '1', 10);
+                const hfPage = parseInt(sessionStorage.getItem('hf_selected_page') || '1', 10);
                 const extractCount = doors.length;
                 const visionCount = yoloResult.count ?? 0;
                 const diff = Math.abs(visionCount - extractCount);
