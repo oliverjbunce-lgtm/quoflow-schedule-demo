@@ -10,6 +10,7 @@ export default function UploadPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
+  const [uploadStage, setUploadStage] = useState<'reading' | 'uploading' | null>(null);
 
   async function handleFile(f: File) {
     if (!f.type.includes('pdf') && !f.name.endsWith('.pdf')) {
@@ -20,25 +21,34 @@ export default function UploadPage() {
     setLoading(true);
     setError(null);
     setFilename(f.name);
+    setUploadStage('uploading');
 
     try {
-      // Read as base64
-      const arrayBuffer = await f.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = '';
-      const chunkSize = 8192;
-      for (let i = 0; i < bytes.byteLength; i += chunkSize) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-      }
-      const base64 = btoa(binary);
+      const formData = new FormData();
+      formData.append('file', f);
 
-      sessionStorage.setItem('qf_pdf', base64);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || `Upload failed (HTTP ${res.status})`);
+      }
+
+      const { fileUri } = await res.json();
+
+      sessionStorage.setItem('qf_file_uri', fileUri);
       sessionStorage.setItem('qf_filename', f.name);
+      // Clear any stale base64 data from previous sessions
+      sessionStorage.removeItem('qf_pdf');
 
       router.push('/extract');
-    } catch {
-      setError('Failed to read file. Please try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload file. Please try again.');
       setLoading(false);
+      setUploadStage(null);
     }
   }
 
@@ -48,6 +58,9 @@ export default function UploadPage() {
     const f = e.dataTransfer.files[0];
     if (f) handleFile(f);
   }
+
+  const stageLabel =
+    uploadStage === 'uploading' ? 'Uploading to AI…' : 'Reading file…';
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -108,7 +121,7 @@ export default function UploadPage() {
           <div className="w-12 h-12 border-3 border-slate-200 border-t-[#1D3461] rounded-full animate-spin" style={{ borderWidth: 3 }} />
           <div className="text-center">
             <p className="font-semibold text-slate-700">{filename}</p>
-            <p className="text-slate-400 text-sm mt-1">Reading file, sending to AI…</p>
+            <p className="text-slate-400 text-sm mt-1">{stageLabel}</p>
           </div>
         </div>
       )}

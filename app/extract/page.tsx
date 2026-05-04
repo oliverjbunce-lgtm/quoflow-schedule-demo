@@ -16,21 +16,23 @@ export default function ExtractPage() {
   const [filename, setFilename] = useState('');
 
   useEffect(() => {
-    const pdf = sessionStorage.getItem('qf_pdf');
+    const fileUri = sessionStorage.getItem('qf_file_uri');
+    const pdf = sessionStorage.getItem('qf_pdf'); // legacy fallback
     const name = sessionStorage.getItem('qf_filename') ?? 'Document';
     setFilename(name);
 
-    if (!pdf) {
+    if (!fileUri && !pdf) {
       router.replace('/');
       return;
     }
 
     async function run() {
       try {
+        const body = fileUri ? { fileUri } : { pdf };
         const res = await fetch('/api/extract', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pdf }),
+          body: JSON.stringify(body),
         });
 
         if (!res.ok) {

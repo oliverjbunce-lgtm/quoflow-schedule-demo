@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 120;
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -60,12 +62,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
 
-    const body = await req.json() as { pdf?: string; pages?: string[] };
+    const body = await req.json() as { fileUri?: string; pdf?: string; pages?: string[] };
 
     let parts: object[];
 
-    if (body.pdf) {
-      // Full PDF sent as base64 — preferred path
+    if (body.fileUri) {
+      // Preferred path: Gemini File API URI (handles large PDFs)
+      parts = [
+        { text: SYSTEM_PROMPT },
+        {
+          file_data: {
+            mime_type: 'application/pdf',
+            file_uri: body.fileUri,
+          },
+        },
+      ];
+    } else if (body.pdf) {
+      // Legacy fallback: inline base64
       parts = [
         { text: SYSTEM_PROMPT },
         {
@@ -76,7 +89,7 @@ export async function POST(req: NextRequest) {
         },
       ];
     } else if (body.pages && Array.isArray(body.pages) && body.pages.length > 0) {
-      // Fallback: individual page images
+      // Legacy fallback: individual page images
       parts = [
         { text: SYSTEM_PROMPT },
         ...body.pages.map((p: string) => ({
@@ -84,7 +97,7 @@ export async function POST(req: NextRequest) {
         })),
       ];
     } else {
-      return NextResponse.json({ error: 'No PDF or pages provided' }, { status: 400 });
+      return NextResponse.json({ error: 'No file URI, PDF, or pages provided' }, { status: 400 });
     }
 
     const geminiRes = await fetch(GEMINI_URL, {
