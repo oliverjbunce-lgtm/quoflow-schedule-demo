@@ -111,9 +111,18 @@ export default function UploadPage() {
               <p className="text-slate-400 text-sm mt-1">or click to browse — PDF only</p>
             </div>
             <div className="flex gap-4 text-xs text-slate-400 mt-1">
-              <span>✓ Full document scan</span>
-              <span>✓ All pages analysed</span>
-              <span>✓ Issues flagged</span>
+              <span className="flex items-center gap-1">
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Full document scan
+              </span>
+              <span className="flex items-center gap-1">
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                All pages analysed
+              </span>
+              <span className="flex items-center gap-1">
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Issues flagged
+              </span>
             </div>
           </div>
           {/* Bottom support text */}
@@ -148,12 +157,39 @@ export default function UploadPage() {
       {!loading && (
         <div className="mt-8 grid grid-cols-3 gap-4">
           {[
-            { icon: '📄', title: 'Upload', desc: 'Drop your full PDF floor plan set' },
-            { icon: '🤖', title: 'AI Analyses', desc: 'Gemini reads every page, finds all doors and relevant specs' },
-            { icon: '✅', title: 'Review & Quote', desc: 'Check extracted doors, flag issues, build your quote' },
+            {
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                </svg>
+              ),
+              title: 'Upload',
+              desc: 'Drop your full PDF floor plan set',
+            },
+            {
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 8v4M12 16h.01"/>
+                </svg>
+              ),
+              title: 'AI Analyses',
+              desc: 'Gemini reads every page, finds all doors and relevant specs',
+            },
+            {
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+              ),
+              title: 'Review & Quote',
+              desc: 'Check extracted doors, flag issues, build your quote',
+            },
           ].map((s) => (
             <div key={s.title} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
-              <div className="text-2xl mb-2">{s.icon}</div>
+              <div className="flex justify-center mb-2 text-[#1D3461]">{s.icon}</div>
               <p className="font-semibold text-slate-700 text-sm">{s.title}</p>
               <p className="text-slate-400 text-xs mt-1">{s.desc}</p>
             </div>
