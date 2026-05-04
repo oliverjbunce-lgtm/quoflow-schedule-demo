@@ -19,22 +19,21 @@ function EditableCell({
   onChange,
   type = 'text',
   options,
-  className = '',
+  style,
 }: {
   value: string | boolean;
   onChange: (val: string | boolean) => void;
   type?: 'text' | 'select' | 'checkbox';
   options?: string[];
-  className?: string;
+  style?: React.CSSProperties;
 }) {
   if (type === 'checkbox') {
     return (
-      <td className={`px-3 py-2 text-center ${className}`}>
+      <td className="td-center" style={{ padding: '0.25rem' }}>
         <input
           type="checkbox"
           checked={value as boolean}
           onChange={(e) => onChange(e.target.checked)}
-          className="w-4 h-4 accent-[#E9A620] cursor-pointer"
         />
       </td>
     );
@@ -42,11 +41,10 @@ function EditableCell({
 
   if (type === 'select' && options) {
     return (
-      <td className={`px-1 py-1 editable-cell ${className}`}>
+      <td className="editable-cell" style={style}>
         <select
           value={value as string}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent border-none outline-none text-sm py-1 px-2 cursor-pointer hover:bg-[#f0f3f9] rounded focus:bg-white focus:border focus:border-[#E9A620] focus:rounded"
         >
           {options.map((opt) => (
             <option key={opt} value={opt}>{opt}</option>
@@ -60,18 +58,17 @@ function EditableCell({
   }
 
   return (
-    <td className={`px-1 py-1 editable-cell ${className}`}>
+    <td className="editable-cell" style={style}>
       <input
         type="text"
         value={value as string}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent border-none outline-none text-sm py-1 px-2 hover:bg-[#f0f3f9] rounded focus:bg-white focus:border focus:border-[#E9A620] focus:rounded min-w-[60px]"
       />
     </td>
   );
 }
 
-export default function DoorTable({ doors, onChange, showAllSpecs = false }: DoorTableProps) {
+export default function DoorTable({ doors, onChange }: DoorTableProps) {
   function updateDoor(id: string, field: keyof DoorRow, value: string | boolean) {
     onChange(doors.map((d) => (d.id === id ? { ...d, [field]: value } : d)));
   }
@@ -100,72 +97,69 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
   }
 
   return (
-    <div className="space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-        <table className="w-full text-sm text-left border-collapse">
+    <div className="stack-4">
+      <div className="table-wrap">
+        <table className="door-table">
           <thead>
-            <tr className="bg-[#1D3461] text-white text-xs uppercase tracking-wider">
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Mark</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Location</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">W×H×T (mm)</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Hanging</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Frame</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Finish</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Core</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap text-center">SC</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Hardware</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap">Notes</th>
-              <th className="px-3 py-3 font-semibold whitespace-nowrap"></th>
+            <tr>
+              <th>Mark</th>
+              <th>Location</th>
+              <th>W×H×T (mm)</th>
+              <th>Hanging</th>
+              <th>Frame</th>
+              <th>Finish</th>
+              <th>Core</th>
+              <th className="th-center">SC</th>
+              <th>Hardware</th>
+              <th>Notes</th>
+              <th></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {doors.length === 0 ? (
               <tr>
-                <td colSpan={11} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={11} className="table-empty">
                   No doors yet. Add a row or re-run extraction.
                 </td>
               </tr>
             ) : (
-              doors.map((door, idx) => (
-                <tr
-                  key={door.id}
-                  className={`transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-[#fafbfd]'} hover:bg-[#f5f7fc]`}
-                >
+              doors.map((door) => (
+                <tr key={door.id}>
                   <EditableCell
                     value={door.mark}
                     onChange={(v) => updateDoor(door.id, 'mark', v)}
-                    className="font-semibold text-[#1D3461] min-w-[60px]"
+                    style={{ minWidth: '60px', fontWeight: 600, color: 'var(--navy)' }}
                   />
                   <EditableCell
                     value={door.location}
                     onChange={(v) => updateDoor(door.id, 'location', v)}
-                    className="min-w-[100px]"
+                    style={{ minWidth: '100px' }}
                   />
                   {/* W×H×T combined column */}
-                  <td className="px-1 py-1 editable-cell min-w-[130px]">
-                    <div className="flex items-center gap-1">
+                  <td className="editable-cell" style={{ minWidth: '130px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <input
                         type="text"
                         value={door.width}
                         onChange={(e) => updateDoor(door.id, 'width', e.target.value)}
                         placeholder="W"
-                        className="w-12 bg-transparent border-none outline-none text-sm py-1 px-1 text-center hover:bg-[#f0f3f9] rounded focus:bg-white focus:border focus:border-[#E9A620] focus:rounded"
+                        style={{ width: '3rem', textAlign: 'center' }}
                       />
-                      <span className="text-gray-400 text-xs">×</span>
+                      <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}>×</span>
                       <input
                         type="text"
                         value={door.height}
                         onChange={(e) => updateDoor(door.id, 'height', e.target.value)}
                         placeholder="H"
-                        className="w-12 bg-transparent border-none outline-none text-sm py-1 px-1 text-center hover:bg-[#f0f3f9] rounded focus:bg-white focus:border focus:border-[#E9A620] focus:rounded"
+                        style={{ width: '3rem', textAlign: 'center' }}
                       />
-                      <span className="text-gray-400 text-xs">×</span>
+                      <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}>×</span>
                       <input
                         type="text"
                         value={door.thickness}
                         onChange={(e) => updateDoor(door.id, 'thickness', e.target.value)}
                         placeholder="T"
-                        className="w-10 bg-transparent border-none outline-none text-sm py-1 px-1 text-center hover:bg-[#f0f3f9] rounded focus:bg-white focus:border focus:border-[#E9A620] focus:rounded"
+                        style={{ width: '2.5rem', textAlign: 'center' }}
                       />
                     </div>
                   </td>
@@ -174,28 +168,28 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                     onChange={(v) => updateDoor(door.id, 'hanging', v)}
                     type="select"
                     options={HANGING_OPTIONS}
-                    className="min-w-[90px]"
+                    style={{ minWidth: '90px' }}
                   />
                   <EditableCell
                     value={door.frameType}
                     onChange={(v) => updateDoor(door.id, 'frameType', v)}
                     type="select"
                     options={FRAME_OPTIONS}
-                    className="min-w-[100px]"
+                    style={{ minWidth: '100px' }}
                   />
                   <EditableCell
                     value={door.doorFinish}
                     onChange={(v) => updateDoor(door.id, 'doorFinish', v)}
                     type="select"
                     options={FINISH_OPTIONS}
-                    className="min-w-[90px]"
+                    style={{ minWidth: '90px' }}
                   />
                   <EditableCell
                     value={door.doorCore}
                     onChange={(v) => updateDoor(door.id, 'doorCore', v)}
                     type="select"
                     options={CORE_OPTIONS}
-                    className="min-w-[90px]"
+                    style={{ minWidth: '90px' }}
                   />
                   <EditableCell
                     value={door.softClose}
@@ -205,17 +199,17 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                   <EditableCell
                     value={door.hardwareCode}
                     onChange={(v) => updateDoor(door.id, 'hardwareCode', v)}
-                    className="min-w-[90px]"
+                    style={{ minWidth: '90px' }}
                   />
                   <EditableCell
                     value={door.notes}
                     onChange={(v) => updateDoor(door.id, 'notes', v)}
-                    className="min-w-[120px]"
+                    style={{ minWidth: '120px' }}
                   />
-                  <td className="px-2 py-1">
+                  <td style={{ padding: '0.25rem' }}>
                     <button
                       onClick={() => deleteDoor(door.id)}
-                      className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded"
+                      className="btn-delete-row"
                       title="Delete row"
                     >
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -230,10 +224,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
         </table>
       </div>
 
-      <button
-        onClick={addRow}
-        className="flex items-center gap-2 text-sm text-[#1D3461] font-medium px-4 py-2 rounded-lg border border-dashed border-[#1D3461] hover:bg-[#1D3461] hover:text-white transition-colors"
-      >
+      <button onClick={addRow} className="btn-add-row">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>

@@ -13,21 +13,21 @@ interface StepIndicatorProps {
 
 export default function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
-    <div className="no-print flex items-center gap-0 mb-8">
+    <div className="step-indicator no-print">
       {steps.map((step, index) => {
         const isCompleted = step.number < currentStep;
         const isCurrent = step.number === currentStep;
 
         return (
-          <div key={step.number} className="flex items-center">
-            <div className="flex items-center gap-2">
+          <div key={step.number} className="step-item">
+            <div className="step-content">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                className={`step-dot ${
                   isCompleted
-                    ? 'bg-[#E9A620] text-white'
+                    ? 'step-dot--completed'
                     : isCurrent
-                    ? 'bg-[#1D3461] text-white'
-                    : 'bg-gray-200 text-gray-500'
+                    ? 'step-dot--current'
+                    : 'step-dot--pending'
                 }`}
               >
                 {isCompleted ? (
@@ -39,8 +39,8 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
                 )}
               </div>
               <span
-                className={`text-sm font-medium ${
-                  isCurrent ? 'text-[#1D3461]' : isCompleted ? 'text-[#E9A620]' : 'text-gray-400'
+                className={`step-label ${
+                  isCurrent ? 'step-label--current' : isCompleted ? 'step-label--completed' : 'step-label--pending'
                 }`}
               >
                 {step.label}
@@ -48,9 +48,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
             </div>
             {index < steps.length - 1 && (
               <div
-                className={`w-12 h-px mx-3 ${
-                  isCompleted ? 'bg-[#E9A620]' : 'bg-gray-200'
-                }`}
+                className={`step-connector ${isCompleted ? 'step-connector--completed' : 'step-connector--pending'}`}
               />
             )}
           </div>

@@ -13,29 +13,27 @@ export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProp
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-[#1D3461] uppercase tracking-wider mb-4">
-        Global Specifications
-      </h3>
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jamb Style</label>
+    <div className="card">
+      <h3 className="card-title">Global Specifications</h3>
+      <div className="form-stack">
+        <div className="form-grid-2">
+          <div className="form-field">
+            <label className="form-label">Jamb Style</label>
             <select
               value={specs.jambStyle}
               onChange={(e) => update('jambStyle', e.target.value as GlobalSpecs['jambStyle'])}
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+              className="form-select"
             >
               <option value="Flat">Flat</option>
               <option value="Groove">Groove</option>
             </select>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jamb Material</label>
+          <div className="form-field">
+            <label className="form-label">Jamb Material</label>
             <select
               value={specs.jambMaterial}
               onChange={(e) => update('jambMaterial', e.target.value as GlobalSpecs['jambMaterial'])}
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+              className="form-select"
             >
               <option value="MDF">MDF</option>
               <option value="Pine">Pine</option>
@@ -43,51 +41,48 @@ export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProp
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Hardware Brand</label>
+        <div className="form-field">
+          <label className="form-label">Hardware Brand</label>
           <input
             type="text"
             value={specs.hardwareBrand}
             onChange={(e) => update('hardwareBrand', e.target.value)}
             placeholder="e.g. Gainsborough, Lockwood"
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+            className="form-input"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Hinge Details</label>
+        <div className="form-field">
+          <label className="form-label">Hinge Details</label>
           <input
             type="text"
             value={specs.hingeDetails}
             onChange={(e) => update('hingeDetails', e.target.value)}
             placeholder="e.g. 3x 100mm butt hinges"
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+            className="form-input"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Handle Height (mm)</label>
+        <div className="form-field">
+          <label className="form-label">Handle Height (mm)</label>
           <input
             type="text"
             value={specs.handleHeight}
             onChange={(e) => update('handleHeight', e.target.value)}
             placeholder="1000"
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E9A620] focus:border-transparent"
+            className="form-input"
           />
         </div>
 
-        <div className="flex items-center gap-3 pt-1">
+        <label className="form-checkbox-label">
           <input
             type="checkbox"
             id="drillingRequired"
             checked={specs.drillingRequired}
             onChange={(e) => update('drillingRequired', e.target.checked)}
-            className="w-4 h-4 accent-[#E9A620] cursor-pointer"
           />
-          <label htmlFor="drillingRequired" className="text-sm text-gray-700 cursor-pointer">
-            Drilling Required
-          </label>
-        </div>
+          Drilling Required
+        </label>
       </div>
     </div>
   );
