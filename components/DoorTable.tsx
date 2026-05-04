@@ -20,9 +20,9 @@ function HangingBadge({ value }: { value: string }) {
     return <span className={`${base} bg-blue-50 text-[#2563EB]`}>{value}</span>;
   }
   if (value === 'LH' || value === 'RH') {
-    return <span className={`${base} bg-[#F7F8FA] text-[#6B7280]`}>{value}</span>;
+    return <span className={`${base} bg-[#F5F5F7] text-[#6B7280]`}>{value}</span>;
   }
-  return <span className={`${base} bg-[#F7F8FA] text-[#9CA3AF]`}>{value}</span>;
+  return <span className={`${base} bg-[#F5F5F7] text-[#9CA3AF]`}>{value}</span>;
 }
 
 export default function DoorTable({ doors, onChange, showAllSpecs = false }: DoorTableProps) {
@@ -33,6 +33,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
 
   function handleRowClick(id: string) {
     setSelectedDoorId((prev) => (prev === id ? null : id));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handlePanelChange(updatedDoor: DoorRow) {
@@ -49,6 +50,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
     const newIndex = direction === 'prev' ? selectedIndex - 1 : selectedIndex + 1;
     if (newIndex >= 0 && newIndex < doors.length) {
       setSelectedDoorId(doors[newIndex].id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -71,6 +73,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
     const updated = [...doors, newDoor];
     onChange(updated);
     setSelectedDoorId(newDoor.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function formatSize(width: string, height: string) {
@@ -85,7 +88,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
       <div className="overflow-x-auto rounded-xl border border-[#E5E7EB]">
         <table className="w-full text-sm text-left border-collapse">
           <thead>
-            <tr className="bg-[#F7F8FA] border-b border-[#E5E7EB]">
+            <tr className="bg-[#F5F5F7] border-b border-[#E5E7EB]">
               <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap w-16">Mark</th>
               <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap">Location</th>
               <th className="py-3 px-4 text-[#6B7280] text-xs font-semibold uppercase tracking-wide whitespace-nowrap hidden sm:table-cell">Room</th>
@@ -111,10 +114,10 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                 const isSelected = door.id === selectedDoorId;
 
                 let rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]';
-                if (isSelected) rowBg = 'bg-[#E9A620]/[0.06]';
+                if (isSelected) rowBg = 'bg-[#0A84FF]/5';
 
                 const leftBorder = isSelected
-                  ? 'border-l-2 border-l-[#E9A620]'
+                  ? 'border-l-2 border-l-[#0A84FF]'
                   : hasNotes
                   ? 'border-l-2 border-l-[#D97706]'
                   : 'border-l-2 border-l-transparent';
@@ -123,10 +126,10 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
                   <tr
                     key={door.id}
                     onClick={() => handleRowClick(door.id)}
-                    className={`cursor-pointer transition-colors hover:bg-[#F7F8FA] ${rowBg} ${leftBorder}`}
+                    className={`cursor-pointer transition-colors hover:bg-[#F5F5F7] ${rowBg} ${leftBorder}`}
                   >
                     {/* Mark */}
-                    <td className="py-2.5 px-4 font-bold text-[#1D3461] w-16 whitespace-nowrap">
+                    <td className="py-2.5 px-4 font-bold text-[#0a0a0a] w-16 whitespace-nowrap">
                       {door.mark || <span className="text-[#D1D5DB] font-normal">—</span>}
                     </td>
 
@@ -189,7 +192,7 @@ export default function DoorTable({ doors, onChange, showAllSpecs = false }: Doo
 
       <button
         onClick={addRow}
-        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-[#0F1117] hover:bg-[#F7F8FA] transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-[#0F1117] hover:bg-[#F5F5F7] transition-colors"
       >
         <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
           <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

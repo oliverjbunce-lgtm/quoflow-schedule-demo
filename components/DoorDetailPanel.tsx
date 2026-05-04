@@ -31,7 +31,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputCls =
-  'border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E9A620]/30 focus:border-[#E9A620] w-full bg-white text-[#0F1117]';
+  'border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A84FF]/30 focus:border-[#0A84FF] w-full bg-white text-[#0F1117]';
 
 export default function DoorDetailPanel({
   door,
@@ -268,7 +268,7 @@ export default function DoorDetailPanel({
                         onChange={(e) => update('softClose', e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-10 h-5 bg-[#E5E7EB] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#E9A620]/30 rounded-full peer peer-checked:after:translate-x-5 peer-checked:bg-[#1D3461] after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                      <div className="w-10 h-5 bg-[#E5E7EB] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#0A84FF]/30 rounded-full peer peer-checked:after:translate-x-5 peer-checked:bg-[#0A84FF] after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
                       <span className="ml-2 text-sm font-medium text-[#0F1117]">
                         {door.softClose ? 'Yes' : 'No'}
                       </span>

@@ -12,7 +12,7 @@ interface QuoteHeaderProps {
   onChange: (data: QuoteHeaderFields) => void;
 }
 
-const inputCls = 'w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm bg-white text-[#0F1117] focus:outline-none focus:ring-2 focus:ring-[#E9A620]/30 focus:border-[#E9A620]';
+const inputCls = 'w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm bg-white text-[#0F1117] focus:outline-none focus:ring-2 focus:ring-[#0A84FF]/30 focus:border-[#0A84FF]';
 const labelCls = 'block text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1';
 
 export default function QuoteHeader({ data, onChange }: QuoteHeaderProps) {
@@ -92,7 +92,7 @@ export default function QuoteHeader({ data, onChange }: QuoteHeaderProps) {
                   value={type}
                   checked={data.deliveryType === type}
                   onChange={() => update('deliveryType', type)}
-                  className="accent-[#E9A620]"
+                  className="accent-[#0A84FF]"
                 />
                 <span className="text-sm text-[#0F1117]">{type}</span>
               </label>

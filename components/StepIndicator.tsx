@@ -22,9 +22,9 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
             <div className="flex flex-col items-center gap-1.5">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                 isCompleted
-                  ? 'bg-[#1D3461] text-white'
+                  ? 'bg-[#0a0a0a] text-white'
                   : isCurrent
-                  ? 'bg-[#E9A620] text-white ring-4 ring-[#E9A620]/20'
+                  ? 'bg-[#0A84FF] text-white ring-4 ring-[#0A84FF]/20'
                   : 'bg-white border border-[#E5E7EB] text-[#9CA3AF]'
               }`}>
                 {isCompleted ? (
@@ -40,7 +40,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
               </span>
             </div>
             {index < steps.length - 1 && (
-              <div className={`flex-1 h-px mx-3 mb-5 ${isCompleted ? 'bg-[#1D3461]' : 'bg-[#E5E7EB]'}`} />
+              <div className={`flex-1 h-px mx-3 mb-5 ${isCompleted ? 'bg-[#0a0a0a]' : 'bg-[#E5E7EB]'}`} />
             )}
           </div>
         );

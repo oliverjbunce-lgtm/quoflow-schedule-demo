@@ -7,7 +7,7 @@ interface GlobalSpecsFormProps {
   onChange: (specs: GlobalSpecs) => void;
 }
 
-const inputCls = 'w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm bg-white text-[#0F1117] focus:outline-none focus:ring-2 focus:ring-[#E9A620]/30 focus:border-[#E9A620]';
+const inputCls = 'w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm bg-white text-[#0F1117] focus:outline-none focus:ring-2 focus:ring-[#0A84FF]/30 focus:border-[#0A84FF]';
 const labelCls = 'block text-xs font-semibold text-[#6B7280] uppercase tracking-wide mb-1';
 
 export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProps) {
@@ -85,7 +85,7 @@ export default function GlobalSpecsForm({ specs, onChange }: GlobalSpecsFormProp
             id="drillingRequired"
             checked={specs.drillingRequired}
             onChange={(e) => update('drillingRequired', e.target.checked)}
-            className="w-4 h-4 accent-[#E9A620] cursor-pointer"
+            className="w-4 h-4 accent-[#0A84FF] cursor-pointer"
           />
           <label htmlFor="drillingRequired" className="text-sm text-[#0F1117] cursor-pointer">
             Drilling Required

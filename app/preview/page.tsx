@@ -36,13 +36,13 @@ export default function PreviewPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/quote')}
-            className="px-4 py-2 text-sm font-medium text-[#6B7280] hover:text-[#0F1117] border border-[#E5E7EB] rounded-lg hover:bg-[#F7F8FA] transition-colors bg-white"
+            className="px-4 py-2 text-sm font-medium text-[#6B7280] hover:text-[#0F1117] border border-[#E5E7EB] rounded-lg hover:bg-[#F5F5F7] transition-colors bg-white"
           >
             ← Back to Edit
           </button>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#E9A620] text-white rounded-lg font-semibold text-sm hover:bg-[#D4941C] transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#0A84FF] text-white rounded-lg font-semibold text-sm hover:bg-[#0066CC] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 5V2h8v3M2 5h12a1 1 0 011 1v5a1 1 0 01-1 1h-2v3H4v-3H2a1 1 0 01-1-1V6a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />

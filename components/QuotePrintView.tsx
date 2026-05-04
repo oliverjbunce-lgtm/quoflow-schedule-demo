@@ -19,15 +19,15 @@ export default function QuotePrintView({ data }: QuotePrintViewProps) {
       <div className="flex items-start justify-between mb-8 pb-6 border-b border-[#E5E7EB]">
         <div>
           <div className="flex items-center gap-2.5 mb-3">
-            {/* Logo mark — navy squares */}
+            {/* Logo mark — blue squares */}
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="10" height="10" x="1" y="1" rx="2" fill="#1D3461" />
-              <rect width="10" height="10" x="13" y="1" rx="2" fill="#1D3461" fillOpacity="0.5" />
-              <rect width="10" height="10" x="1" y="13" rx="2" fill="#1D3461" fillOpacity="0.5" />
-              <rect width="10" height="10" x="13" y="13" rx="2" fill="#1D3461" fillOpacity="0.2" />
+              <rect width="10" height="10" x="1" y="1" rx="2" fill="#0A84FF" />
+              <rect width="10" height="10" x="13" y="1" rx="2" fill="#0A84FF" fillOpacity="0.5" />
+              <rect width="10" height="10" x="1" y="13" rx="2" fill="#0A84FF" fillOpacity="0.5" />
+              <rect width="10" height="10" x="13" y="13" rx="2" fill="#0A84FF" fillOpacity="0.2" />
             </svg>
             <span className="text-[#0F1117] font-bold text-xl tracking-tight">
-              Quo<span className="text-[#E9A620]">flow</span>
+              Quo<span style={{ color: '#0A84FF' }}>flow</span>
             </span>
           </div>
           <p className="text-[#6B7280] text-sm">Door Schedule Quote</p>
@@ -119,7 +119,7 @@ export default function QuotePrintView({ data }: QuotePrintViewProps) {
         <div className="overflow-x-auto rounded-xl border border-[#E5E7EB]">
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-[#F7F8FA] border-b border-[#E5E7EB]">
+              <tr className="bg-[#F5F5F7] border-b border-[#E5E7EB]">
                 <th className="px-3 py-2.5 text-left text-[#6B7280] text-xs font-semibold uppercase tracking-wide">Mark</th>
                 <th className="px-3 py-2.5 text-left text-[#6B7280] text-xs font-semibold uppercase tracking-wide">Location</th>
                 <th className="px-3 py-2.5 text-left text-[#6B7280] text-xs font-semibold uppercase tracking-wide">Width</th>
@@ -140,7 +140,7 @@ export default function QuotePrintView({ data }: QuotePrintViewProps) {
                   key={door.id}
                   className={idx % 2 === 0 ? 'bg-white' : 'bg-[#FAFAFA]'}
                 >
-                  <td className="px-3 py-2.5 font-semibold text-[#1D3461]">{door.mark}</td>
+                  <td className="px-3 py-2.5 font-semibold text-[#0a0a0a]">{door.mark}</td>
                   <td className="px-3 py-2.5 text-[#0F1117]">{door.location}</td>
                   <td className="px-3 py-2.5 text-[#0F1117]">{door.width}</td>
                   <td className="px-3 py-2.5 text-[#0F1117]">{door.height}</td>

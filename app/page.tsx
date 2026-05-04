@@ -83,8 +83,8 @@ export default function UploadPage() {
           className={`
             flex flex-col items-center justify-between w-full h-72 rounded-2xl border-2 border-dashed cursor-pointer transition-all px-6 py-8
             ${isDragging
-              ? 'border-[#E9A620] bg-[#E9A620]/5'
-              : 'border-[#E5E7EB] bg-white hover:border-[#E9A620]'
+              ? 'border-[#0A84FF] bg-[#0A84FF]/5'
+              : 'border-[#E5E7EB] bg-white hover:border-[#0A84FF]'
             }
           `}
         >
@@ -97,9 +97,9 @@ export default function UploadPage() {
           />
           <div className="flex-1 flex flex-col items-center justify-center gap-4 pointer-events-none">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <rect width="40" height="40" rx="10" fill="#F7F8FA"/>
-              <path d="M20 26V14M14 20l6-6 6 6" stroke="#1D3461" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 30h16" stroke="#1D3461" strokeWidth="2" strokeLinecap="round"/>
+              <rect width="40" height="40" rx="10" fill="#F5F5F7"/>
+              <path d="M20 26V14M14 20l6-6 6 6" stroke="#0a0a0a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 30h16" stroke="#0a0a0a" strokeWidth="2" strokeLinecap="round"/>
             </svg>
             <div className="text-center">
               <p className="font-medium text-[#0F1117] text-base">
@@ -119,7 +119,7 @@ export default function UploadPage() {
         <div className="flex flex-col items-center justify-center w-full h-72 rounded-2xl border border-[#E5E7EB] bg-white gap-4">
           <div
             className="w-10 h-10 rounded-full"
-            style={{ border: '2px solid #E5E7EB', borderTopColor: '#1D3461', animation: 'spin 0.8s linear infinite' }}
+            style={{ border: '2px solid #E5E7EB', borderTopColor: '#0A84FF', animation: 'spin 0.8s linear infinite' }}
           />
           <div className="text-center">
             <p className="font-bold text-[#0F1117] text-sm">{filename}</p>
@@ -171,7 +171,7 @@ export default function UploadPage() {
             },
           ].map((s) => (
             <div key={s.title} className="bg-white border border-[#E5E7EB] rounded-xl p-5">
-              <div className="text-[#1D3461] mb-3">{s.icon}</div>
+              <div className="text-[#0a0a0a] mb-3">{s.icon}</div>
               <p className="font-semibold text-[#0F1117] text-sm">{s.title}</p>
               <p className="text-[#9CA3AF] text-xs mt-1">{s.desc}</p>
             </div>

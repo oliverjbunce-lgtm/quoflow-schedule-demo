@@ -65,7 +65,7 @@ function SectionHeader({
       <div className="flex items-center gap-2.5">
         <h2 className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-widest">{title}</h2>
         {count !== undefined && (
-          <span className="text-xs font-medium text-[#9CA3AF] bg-[#F7F8FA] border border-[#E5E7EB] px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-[#9CA3AF] bg-[#F5F5F7] border border-[#E5E7EB] px-2 py-0.5 rounded-full">
             {count}
           </span>
         )}
@@ -149,7 +149,7 @@ export default function ExtractPage() {
         const detectRes = await fetch('/api/detect', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: hfSessionId, page: hfPage }),
+          body: JSON.stringify({ sessionId: hfSessionId, suggestedPage: hfPage }),
         });
         if (!detectRes.ok) return;
         const detectData = await detectRes.json();
@@ -205,10 +205,10 @@ export default function ExtractPage() {
           <div className="relative w-12 h-12">
             <div
               className="w-12 h-12 rounded-full"
-              style={{ border: '2px solid #E5E7EB', borderTopColor: '#1D3461', animation: 'spin 0.8s linear infinite' }}
+              style={{ border: '2px solid #E5E7EB', borderTopColor: '#0A84FF', animation: 'spin 0.8s linear infinite' }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-[#E9A620]" />
+              <div className="w-2 h-2 rounded-full bg-[#0A84FF]" />
             </div>
           </div>
           <div className="text-center">
@@ -228,7 +228,7 @@ export default function ExtractPage() {
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-[#DC2626]">
           <p className="font-bold mb-1 text-sm">Extraction Failed</p>
           <p className="text-sm">{error}</p>
-          <button onClick={() => router.push('/')} className="mt-3 text-sm text-[#1D3461] font-semibold underline">
+          <button onClick={() => router.push('/')} className="mt-3 text-sm text-[#0A84FF] font-semibold underline">
             Back to Upload
           </button>
         </div>
@@ -340,7 +340,7 @@ export default function ExtractPage() {
               right={<span className="text-[#9CA3AF] text-xs">Click any row to edit</span>}
             />
             {activeFilter && (
-              <div className="mb-3 flex items-center gap-2 text-xs text-[#6B7280] bg-[#F7F8FA] border border-[#E5E7EB] px-3 py-2 rounded-lg">
+              <div className="mb-3 flex items-center gap-2 text-xs text-[#6B7280] bg-[#F5F5F7] border border-[#E5E7EB] px-3 py-2 rounded-lg">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                   <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5"/>
                   <path d="M6 5v3M6 3.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -367,13 +367,13 @@ export default function ExtractPage() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-[#1D3461] text-sm">{wall.wallType}</span>
+                      <span className="font-bold text-[#0a0a0a] text-sm">{wall.wallType}</span>
                       {wall.cavitySuitable ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-[#059669]">
                           <IconCheck /> Cavity Suitable
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#F7F8FA] text-[#9CA3AF]">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#F5F5F7] text-[#9CA3AF]">
                           Standard Only
                         </span>
                       )}
@@ -406,7 +406,7 @@ export default function ExtractPage() {
                 <div className="flex items-center gap-3 bg-white border border-[#E5E7EB] rounded-xl p-5">
                   <div
                     className="w-5 h-5 rounded-full flex-shrink-0"
-                    style={{ border: '2px solid #E5E7EB', borderTopColor: '#1D3461', animation: 'spin 0.8s linear infinite' }}
+                    style={{ border: '2px solid #E5E7EB', borderTopColor: '#0A84FF', animation: 'spin 0.8s linear infinite' }}
                   />
                   <p className="text-sm text-[#6B7280] font-medium">Scanning floor plans…</p>
                 </div>
@@ -437,7 +437,7 @@ export default function ExtractPage() {
                       {/* Right: stats */}
                       <div className="flex flex-col justify-center gap-3">
                         <div>
-                          <p className="text-3xl font-bold text-[#1D3461]">{visionCount}</p>
+                          <p className="text-3xl font-bold text-[#0a0a0a]">{visionCount}</p>
                           <p className="text-sm text-[#6B7280] mt-0.5">doors detected</p>
                         </div>
 
@@ -455,7 +455,7 @@ export default function ExtractPage() {
                           </span>
                         )}
 
-                        <p className="text-xs text-[#9CA3AF]">Scanned page {hfPage} of your floor plans</p>
+                        <p className="text-xs text-[#9CA3AF]">Scanned page {(yoloResult as any).page ?? hfPage} of your floor plans</p>
                       </div>
                     </div>
                   </div>
@@ -468,7 +468,7 @@ export default function ExtractPage() {
           <div className="flex items-center gap-3 flex-wrap pt-2 border-t border-[#E5E7EB]">
             <button
               onClick={() => router.push('/')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-[#0F1117] text-sm font-medium hover:bg-[#F7F8FA] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-[#0F1117] text-sm font-medium hover:bg-[#F5F5F7] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M9 2L3 7l6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -481,7 +481,7 @@ export default function ExtractPage() {
               className={`inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                 doors.length === 0
                   ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
-                  : 'bg-[#E9A620] text-white hover:bg-[#D4941C]'
+                  : 'bg-[#0A84FF] text-white hover:bg-[#0066CC]'
               }`}
             >
               Continue to Quote

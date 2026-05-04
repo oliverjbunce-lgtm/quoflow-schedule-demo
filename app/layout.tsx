@@ -12,21 +12,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-screen bg-[#F7F8FA]">
+      <body className="min-h-screen bg-[#F5F5F7]">
         {/* Nav */}
         <header className="no-print bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between h-14">
               <a href="/" className="flex items-center gap-2.5">
-                {/* 4-square logo mark — navy on white */}
+                {/* 4-square logo mark — blue */}
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="10" height="10" x="1" y="1" rx="2" fill="#1D3461" />
-                  <rect width="10" height="10" x="13" y="1" rx="2" fill="#1D3461" fillOpacity="0.5" />
-                  <rect width="10" height="10" x="1" y="13" rx="2" fill="#1D3461" fillOpacity="0.5" />
-                  <rect width="10" height="10" x="13" y="13" rx="2" fill="#1D3461" fillOpacity="0.2" />
+                  <rect width="10" height="10" x="1" y="1" rx="2" fill="#0A84FF" />
+                  <rect width="10" height="10" x="13" y="1" rx="2" fill="#0A84FF" fillOpacity="0.5" />
+                  <rect width="10" height="10" x="1" y="13" rx="2" fill="#0A84FF" fillOpacity="0.5" />
+                  <rect width="10" height="10" x="13" y="13" rx="2" fill="#0A84FF" fillOpacity="0.2" />
                 </svg>
                 <span className="text-[#0F1117] font-semibold text-base tracking-tight">
-                  Quo<span className="text-[#E9A620]">flow</span>
+                  Quo<span style={{ color: '#0A84FF' }}>flow</span>
                 </span>
               </a>
               <div className="flex items-center gap-2">

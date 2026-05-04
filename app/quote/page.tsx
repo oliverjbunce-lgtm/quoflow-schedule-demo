@@ -91,7 +91,7 @@ export default function QuotePage() {
             </button>
             <button
               onClick={handlePreview}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#E9A620] text-white rounded-lg font-semibold text-sm hover:bg-[#D4941C] transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#0A84FF] text-white rounded-lg font-semibold text-sm hover:bg-[#0066CC] transition-colors"
             >
               Preview Quote
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -122,7 +122,7 @@ export default function QuotePage() {
         </button>
         <button
           onClick={handlePreview}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#E9A620] text-white rounded-lg font-semibold text-sm hover:bg-[#D4941C] transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#0A84FF] text-white rounded-lg font-semibold text-sm hover:bg-[#0066CC] transition-colors"
         >
           Preview Quote
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
