@@ -66,6 +66,17 @@ Rules:
 - Do not fabricate data. If a field is genuinely unknown, leave it as an empty string.
 - Do not return markdown. Return only the raw JSON object.`;
 
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, options);
+    if (res.ok || (res.status !== 429 && res.status !== 503)) return res;
+    if (attempt < maxRetries) {
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+    }
+  }
+  throw new Error('Gemini API unavailable after retries');
+}
+
 function stripCodeFences(text: string): string {
   return text
     .replace(/^```(?:json)?\s*/i, '')
@@ -117,7 +128,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file URI, PDF, or pages provided' }, { status: 400 });
     }
 
-    const geminiRes = await fetch(GEMINI_URL, {
+    const geminiRes = await fetchWithRetry(GEMINI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

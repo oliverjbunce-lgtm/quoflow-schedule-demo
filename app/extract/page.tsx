@@ -86,6 +86,7 @@ export default function ExtractPage() {
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [yoloResult, setYoloResult] = useState<YoloResult | null>(null);
   const [yoloLoading, setYoloLoading] = useState(false);
+  const [detectJobId, setDetectJobId] = useState<string | null>(null);
 
   // Flags UI state
   const [activeFilter, setActiveFilter] = useState<'error' | 'warning' | null>(null);
@@ -152,11 +153,33 @@ export default function ExtractPage() {
           body: JSON.stringify({ tmpFileId, selectedPage: hfSelectedPage }),
         });
         if (!detectRes.ok) return;
-        const detectData = await detectRes.json();
-        if (!detectData.error) setYoloResult(detectData);
+        const { jobId } = await detectRes.json();
+        if (!jobId) return;
+        setDetectJobId(jobId);
+
+        const interval = setInterval(async () => {
+          try {
+            const statusRes = await fetch(`/api/detect-status?jobId=${jobId}`);
+            if (!statusRes.ok) return;
+            const statusData = await statusRes.json();
+            if (statusData.status === 'done') {
+              clearInterval(interval);
+              setDetectJobId(null);
+              setYoloLoading(false);
+              if (statusData.result) setYoloResult(statusData.result as YoloResult);
+            } else if (statusData.status === 'error') {
+              clearInterval(interval);
+              setDetectJobId(null);
+              setYoloLoading(false);
+            }
+          } catch {
+            clearInterval(interval);
+            setDetectJobId(null);
+            setYoloLoading(false);
+          }
+        }, 2000);
       } catch {
         // Non-fatal — just don't show the section
-      } finally {
         setYoloLoading(false);
       }
     }
