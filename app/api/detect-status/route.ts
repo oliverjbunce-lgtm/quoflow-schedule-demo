@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-
-export type DetectJob = { status: 'pending' | 'done' | 'error'; result?: object; error?: string };
-export const detectJobs = new Map<string, DetectJob>();
+import { detectJobs } from './store';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { detectJobs } from '../detect-status/route';
+import { detectJobs } from '../detect-status/store';
 
 const HF_BASE_URL = 'https://oliverbunce-id-plan-analyser-api.hf.space';
 export const maxDuration = 10;
